@@ -3,7 +3,9 @@
 
 
 (def token-res
-  {#"\s+" :whitespace
+  {#"(\s+)" :whitespace
+   #"(//\.*)" :whitespace
+   ;TODO: add regex for multiline comment as whitespace
 
    #"(class)" :keyword
    #"(constructor)" :keyword
