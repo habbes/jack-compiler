@@ -65,7 +65,7 @@
 (defn extract-token
   "Extracts token from s if the provided rule is the next match
   for s. Returns vector of the new string after extraction and token
-  of the rule's type. Returns nil of the rule is not the next match."
+  of the rule's type. Returns nil if the rule is not the next match."
   [s [r t]]
   (if-let [[match value] (re-find r s)]
     [(remove-match s match) (Token. t value)]
