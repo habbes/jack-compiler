@@ -5,26 +5,26 @@
 (defrecord Token [type value])
 
 (def token-rules
-  {#"^^(\s+)" :whitespace
-   #"^^(//\.*)" :whitespace
+  {#"^(\s+)" :whitespace
+   #"^(//\.*)" :whitespace
    ;TODO: add regex for multiline comment as whitespace
 
-   #"^^(class)" :keyword
-   #"^^(constructor)" :keyword
-   #"^^(function)" :keyword
-   #"^^(method)" :keyword
-   #"^^(field)" :keyword
-   #"^^(static)" :keyword
-   #"^^(var)" :keyword
-   #"^^(int)" :keyword
-   #"^^(char)" :keyword
-   #"^^(boolean)" :keyword
-   #"^^(void)" :keyword
-   #"^^(true)" :keyword
-   #"^^(false)" :keyword
-   #"^^(null)" :keyword
-   #"^^(this)" :keyword
-   #"^^(let)" :keyword
+   #"^(class)" :keyword
+   #"^(constructor)" :keyword
+   #"^(function)" :keyword
+   #"^(method)" :keyword
+   #"^(field)" :keyword
+   #"^(static)" :keyword
+   #"^(var)" :keyword
+   #"^(int)" :keyword
+   #"^(char)" :keyword
+   #"^(boolean)" :keyword
+   #"^(void)" :keyword
+   #"^(true)" :keyword
+   #"^(false)" :keyword
+   #"^(null)" :keyword
+   #"^(this)" :keyword
+   #"^(let)" :keyword
    #"^(do)" :keyword
    #"^(if)" :keyword
    #"^(else)" :keyword
