@@ -77,3 +77,10 @@
   of the type of the rule that matched. Returns nil if no matches found."
   [s rs]
   (some (partial extract-token-with-rule s) rs))
+
+(defn extract-token
+  "Extracts the next token from s based on Jack's syntax rules.
+  Returns vector of new string after extraction and the extracted token.
+  Returns no rule matched, indicating some syntax error in s."
+  [s]
+  (extract-token-with-rules s token-rules))
