@@ -84,3 +84,10 @@
   Returns no rule matched, indicating some syntax error in s."
   [s]
   (extract-token-with-rules s token-rules))
+
+(defn token-seq
+  "Generates a lazy seq of tokens from s"
+  [s]
+  (if-let [[nxt t] (extract-token s)]
+    (cons t (lazy-seq (token-seq nxt)))
+    nil))
