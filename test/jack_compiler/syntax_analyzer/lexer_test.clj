@@ -1,8 +1,9 @@
 (ns jack-compiler.syntax-analyzer.lexer-test
   (:require [clojure.test :refer :all]
             [jack-compiler.syntax-analyzer.lexer :refer :all]
+            [jack-compiler.syntax-analyzer.token :as tk]
             [clojure.string :as s])
-  (:import [jack_compiler.syntax_analyzer.lexer Token]))
+  (:import [jack_compiler.syntax_analyzer.token Token]))
 
 (def test-src
 "if (x < 0)

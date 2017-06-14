@@ -1,8 +1,7 @@
 (ns jack-compiler.syntax-analyzer.lexer
-  (:require [clojure.string :as str]))
-  ;(:import [jack_compiler.syntax_analyzer.token Token]))
-
-(defrecord Token [type value])
+  (:require [clojure.string :as str]
+            [jack-compiler.syntax-analyzer.token :as tk])
+  (:import [jack_compiler.syntax_analyzer.token Token]))
 
 (def token-rules
   {#"^(\s+)" :whitespace
@@ -93,15 +92,11 @@
       (cons t (lazy-seq (token-all-seq nxt)))
       (throw (ex-info "Syntax error" {:source s})))))
 
-(defn whitespace?
-  "Checks whether token t is a whitespace"
-  [t]
-  (= :whitespace (.type t)))
-
-(def not-whitespace? (complement whitespace?))
-
 (defn token-seq
   "Generates a lazy seq of tokens from s.
   Skips whitespace tokens"
   [s]
-  (filter not-whitespace? (token-all-seq s)))
+  (filter tk/not-whitespace? (token-all-seq s)))
+
+(defprotocol TokenWriter
+  (write-tokens [tw ts w] "write tokens from the seq ts to the writer w"))
