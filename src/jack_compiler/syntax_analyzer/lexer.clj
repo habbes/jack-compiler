@@ -90,7 +90,7 @@
   [s]
   (if-let [[nxt t] (extract-token s)]
     (cons t (lazy-seq (token-seq nxt)))
-    nil))
+    (ex-info "Syntax error" {:source s})))
 
 (defn whitespace?
   "Checks whether token t is a whitespace"
