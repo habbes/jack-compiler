@@ -88,9 +88,10 @@
 (defn token-all-seq
   "Generates a lazy seq of all tokens from s"
   [s]
-  (if-let [[nxt t] (extract-token s)]
-    (cons t (lazy-seq (token-seq nxt)))
-    (ex-info "Syntax error" {:source s})))
+  (if (empty? s) nil
+    (if-let [[nxt t] (extract-token s)]
+      (cons t (lazy-seq (token-all-seq nxt)))
+      (throw (ex-info "Syntax error" {:source s})))))
 
 (defn whitespace?
   "Checks whether token t is a whitespace"
@@ -103,4 +104,4 @@
   "Generates a lazy seq of tokens from s.
   Skips whitespace tokens"
   [s]
-  (filter not-whitespace? (token-seq s))
+  (filter not-whitespace? (token-all-seq s)))

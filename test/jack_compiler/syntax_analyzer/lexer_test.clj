@@ -67,3 +67,25 @@
   (testing "Returns nil on invalid syntax"
     (let [out (extract-token "'")]
       (is (= out nil)))))
+
+(deftest token-seq-test
+  (testing "Generates seq of non-whitespace tokens from source"
+    (let [ts (into [] (token-seq test-src))]
+      (is (= ts [(Token. :keyword "if")
+                 (Token. :symbol "(")
+                 (Token. :identifier "x")
+                 (Token. :symbol "<")
+                 (Token. :integerConstant "0")
+                 (Token. :symbol ")")
+                 (Token. :symbol "{")
+                 (Token. :keyword "let")
+                 (Token. :identifier "state")
+                 (Token. :symbol "=")
+                 (Token. :stringConstant "negative")
+                 (Token. :symbol ";")
+                 (Token. :symbol "}")]))))
+  (testing "Throws exception on syntax error"
+    (let [src "let `test=1;"]
+      (is (thrown-with-msg? Exception
+                           #"Syntax error"
+                           (into [] (token-seq src)))))))
