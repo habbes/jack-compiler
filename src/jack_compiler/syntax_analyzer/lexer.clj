@@ -85,9 +85,22 @@
   [s]
   (extract-token-with-rules s token-rules))
 
-(defn token-seq
-  "Generates a lazy seq of tokens from s"
+(defn token-all-seq
+  "Generates a lazy seq of all tokens from s"
   [s]
   (if-let [[nxt t] (extract-token s)]
     (cons t (lazy-seq (token-seq nxt)))
     nil))
+
+(defn whitespace?
+  "Checks whether token t is a whitespace"
+  [t]
+  (= :whitespace (.type t)))
+
+(def not-whitespace? (complement whitespace?))
+
+(defn token-seq
+  "Generates a lazy seq of tokens from s.
+  Skips whitespace tokens"
+  [s]
+  (filter not-whitespace? (token-seq s))
