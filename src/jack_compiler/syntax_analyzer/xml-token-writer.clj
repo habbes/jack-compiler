@@ -1,4 +1,4 @@
-(ns jack-compiler.syntax-analyzer.token-xml-writer
+(ns jack-compiler.syntax-analyzer.xml-token-writer
   (:require [jack-compiler.syntax-analyzer.lexer :refer [TokenWriter]]
             [jack-compiler.syntax-analyzer.token :as tk]))
 
