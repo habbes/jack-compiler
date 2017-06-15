@@ -1,10 +1,8 @@
-(ns jack-compiler.syntax-analyzer.xml-token-writer-test
+(ns jack-compiler.syntax-analyzer.xml-writer-test
   (:require [clojure.test :refer :all]
-            [jack-compiler.syntax-analyzer.xml-token-writer :refer :all]
+            [jack-compiler.syntax-analyzer.xml-writer :refer :all]
             [jack-compiler.syntax-analyzer.lexer :as lx]
-            [jack-compiler.syntax-analyzer.token :as tk]
-            [clojure.string :as s])
-  (:import [jack_compiler.syntax_analyzer.token Token]))
+            [clojure.string :as s]))
 
 
 (def test-src

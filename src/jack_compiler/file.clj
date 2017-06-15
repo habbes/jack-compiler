@@ -36,7 +36,7 @@
   [path]
   (get-filtered-files path jack-file?))
 
-(defn- get-output-path-for-file
+(defn get-output-path-for-file
   "Gets the output path of the specified extension based on
   the input file's path"
   [input-path ext]

@@ -1,10 +1,9 @@
 (ns jack-compiler.syntax-analyzer.core
   (:require [jack-compiler.file :as file]
             [jack-compiler.syntax-analyzer.lexer :as lx]
-            [jack-compiler.syntax-analyzer.xml-token-writer :refer xml-writer]
-            [jack-compiler.syntax-analyzer.core.lexed-source]
-            [clojure.java.io :as io])
-  (:import [jack_compiler.syntax_analyzer.lexed_source LexedSource]))
+            [clojure.java.io :as io]))
+
+(defrecord LexedSource [path tokens])
 
 (defn lex-source
   "Lexes the specified file and returned a
@@ -12,7 +11,7 @@
   [path]
   (let [s (slurp path)
         ts (lx/token-seq s)]
-    (LexedSource. path ts))
+    (LexedSource. path ts)))
 
 (defn lex-dir
   "Lexes all the jack files in the specified dir

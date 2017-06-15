@@ -1,7 +1,9 @@
-(ns jack-compiler.syntax-analyzer.xml-token-writer
+(ns jack-compiler.syntax-analyzer.xml-writer
   (:require [jack-compiler.syntax-analyzer.lexer :refer [TokenWriter] :as lx]
             [jack-compiler.syntax-analyzer.core :refer [LexedSourceHandler]]
-            [jack-compiler.syntax-analyzer.token :as tk]))
+            [jack-compiler.syntax-analyzer.token :as tk]
+            [jack-compiler.file :as file]
+            [clojure.java.io :as io]))
 
 
 (defn convert-symbol
@@ -33,8 +35,8 @@
   "Writes tokens to an output xml file corresponding
   to the in-path."
   [tw in-path tokens]
-  (let [out-path (file/get-ouput-path-for-file in-path ".xml")]
-    (with-open [w (io/writer path)]
+  (let [out-path (file/get-output-path-for-file in-path ".xml")]
+    (with-open [w (io/writer out-path)]
       (lx/write-tokens tw tokens w))))
 
 (deftype XmlWriter []
