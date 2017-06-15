@@ -21,3 +21,16 @@
   (let [paths (file/get-jack-files dir)]
     (map lex-source paths)))
 
+(defprotocol LexedSourceHandler
+  (handle-lexed-source [h ls] "handles a LexedSource instance"))
+
+(defn handle-lexed-sources
+  "Handles a seq of lexed sources using the specified handler"
+  [h lss]
+  (doseq [ls lss]
+    (handle-lexed-source h ls)))
+
+(defn lex-and-handle-dir
+  [dir]
+  (let [lss (lex-dir dir)]
+    (handle-lexed-sources lss)))
