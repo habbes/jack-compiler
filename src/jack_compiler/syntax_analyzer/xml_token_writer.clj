@@ -1,5 +1,6 @@
 (ns jack-compiler.syntax-analyzer.xml-token-writer
-  (:require [jack-compiler.syntax-analyzer.lexer :refer [TokenWriter]]
+  (:require [jack-compiler.syntax-analyzer.lexer :refer [TokenWriter] :as lx]
+            [jack-compiler.syntax-analyzer.core :refer [LexedSourceHandler]]
             [jack-compiler.syntax-analyzer.token :as tk]))
 
 
@@ -28,6 +29,14 @@
        (token-to-xml-value token)
        " </" (name t) ">"))
 
+(defn write-tokens-to-file
+  "Writes tokens to an output xml file corresponding
+  to the in-path."
+  [tw in-path tokens]
+  (let [out-path (file/get-ouput-path-for-file in-path ".xml")]
+    (with-open [w (io/writer path)]
+      (lx/write-tokens tw tokens w))))
+
 (deftype XmlWriter []
   TokenWriter
   (write-tokens
@@ -35,11 +44,13 @@
     (.write w "<tokens>\n")
     (doseq [t ts]
       (.write w (str "  " (token-to-xml-element t) "\n")))
-    (.write w "</tokens>")))
+    (.write w "</tokens>"))
+  LexedSourceHandler
+  (handle-lexed-source
+    [this {:keys [path tokens]}]
+    (write-tokens-to-file this path tokens)))
 
 (defn xml-writer
   "Returns an instance of XmlWriter"
   []
   (XmlWriter.))
-
-
