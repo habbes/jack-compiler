@@ -1,9 +1,9 @@
 (ns jack-compiler.syntax-analyzer.core
   (:require [jack-compiler.file :as file]
             [jack-compiler.syntax-analyzer.lexer :as lx]
-            [clojure.java.io :as io]))
-
-(defrecord LexedSource [path tokens])
+            [jack-compiler.syntax-analyzer.lexed-source]
+            [clojure.java.io :as io])
+  (:import [jack_compiler.syntax_analyzer.lexed_source LexedSource]))
 
 (defn lex-source
   "Lexes the specified file and returned a
@@ -20,8 +20,12 @@
   (let [paths (file/get-jack-files dir)]
     (map lex-source paths)))
 
+
+(defprotocol TokenWriter
+  (write-tokens [tw ts w] "write tokens from the seq ts to the writer w"))
+
 (defprotocol LexedSourceHandler
-  (handle-lexed-source [h ls] "handles a LexedSource instance"))
+  (handle-lexed-source [h ls] "Handles a LexedSource instance"))
 
 (defn handle-lexed-sources
   "Handles a seq of lexed sources using the specified handler"

@@ -97,6 +97,3 @@
   Skips whitespace tokens"
   [s]
   (filter tk/not-whitespace? (token-all-seq s)))
-
-(defprotocol TokenWriter
-  (write-tokens [tw ts w] "write tokens from the seq ts to the writer w"))

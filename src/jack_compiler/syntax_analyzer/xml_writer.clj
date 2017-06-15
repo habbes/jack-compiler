@@ -1,6 +1,6 @@
 (ns jack-compiler.syntax-analyzer.xml-writer
-  (:require [jack-compiler.syntax-analyzer.lexer :refer [TokenWriter] :as lx]
-            [jack-compiler.syntax-analyzer.core :refer [LexedSourceHandler]]
+  (:require [jack-compiler.syntax-analyzer.lexer :as lx]
+            [jack-compiler.syntax-analyzer.core :refer [LexedSourceHandler TokenWriter] :as sa]
             [jack-compiler.syntax-analyzer.token :as tk]
             [jack-compiler.file :as file]
             [clojure.java.io :as io]))
@@ -37,7 +37,7 @@
   [tw in-path tokens]
   (let [out-path (file/get-output-path-for-file in-path ".xml")]
     (with-open [w (io/writer out-path)]
-      (lx/write-tokens tw tokens w))))
+      (sa/write-tokens tw tokens w))))
 
 (deftype XmlWriter []
   TokenWriter

@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [jack-compiler.syntax-analyzer.xml-writer :refer :all]
             [jack-compiler.syntax-analyzer.lexer :as lx]
+            [jack-compiler.syntax-analyzer.core :as sa]
             [clojure.string :as s]))
 
 
@@ -32,5 +33,5 @@
           ts (lx/token-seq test-src)
           w (java.io.StringWriter.)
           expected test-output]
-      (lx/write-tokens tw ts w)
+      (sa/write-tokens tw ts w)
       (is (= (.toString w) expected)))))
