@@ -34,11 +34,12 @@
     [_ ts w]
     (.write w "<tokens>")
     (doseq [t ts]
-      (.write w (token-to-xml-element (t))))
+      (.write w (token-to-xml-element t)))
     (.write w "</tokens>")))
 
 (defn xml-writer
   "Returns an instance of XmlWriter"
+  []
   (XmlWriter.))
 
 
