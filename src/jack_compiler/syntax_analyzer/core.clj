@@ -34,6 +34,8 @@
     (handle-lexed-source h ls)))
 
 (defn lex-and-handle-dir
-  [dir]
+  "Lexes all jack files in the specified dir and handles
+  them using the specified handler"
+  [h dir]
   (let [lss (lex-dir dir)]
-    (handle-lexed-sources lss)))
+    (handle-lexed-sources h lss)))
