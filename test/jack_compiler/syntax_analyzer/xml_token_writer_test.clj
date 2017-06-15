@@ -13,19 +13,19 @@
 
 (def test-output
 "<tokens>
-   <keyword> if </keyword>
-   <symbol> ( </symbol>
-   <identifier> x </identifier>
-   <symbol> &lt; </symbol>
-   <integerConstant> 0 </integerConstant>
-   <symbol> ) </symbol>
-   <symbol> { </symbol>
-   <keyword> let </keyword>
-   <identifier> state </identifier>
-   <symbol> = </symbol>
-   <stringConstant> negative </stringConstant>
-   <symbol> ; </symbol>
-   <symbol> } </symbol>
+  <keyword> if </keyword>
+  <symbol> ( </symbol>
+  <identifier> x </identifier>
+  <symbol> &lt; </symbol>
+  <integerConstant> 0 </integerConstant>
+  <symbol> ) </symbol>
+  <symbol> { </symbol>
+  <keyword> let </keyword>
+  <identifier> state </identifier>
+  <symbol> = </symbol>
+  <stringConstant> negative </stringConstant>
+  <symbol> ; </symbol>
+  <symbol> } </symbol>
 </tokens>")
 
 (deftest write-tokens-test
@@ -33,6 +33,6 @@
     (let [tw (xml-writer)
           ts (lx/token-seq test-src)
           w (java.io.StringWriter.)
-          expected (s/replace test-output #"\s" "")]
+          expected test-output]
       (lx/write-tokens tw ts w)
       (is (= (.toString w) expected)))))

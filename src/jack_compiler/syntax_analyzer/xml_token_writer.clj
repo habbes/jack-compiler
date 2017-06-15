@@ -24,17 +24,17 @@
   "Returns a string representing the token
   as an xml element"
   [{t :type :as token}]
-  (str "<" (name t) ">"
+  (str "<" (name t) "> "
        (token-to-xml-value token)
-       "</" (name t) ">"))
+       " </" (name t) ">"))
 
 (deftype XmlWriter []
   TokenWriter
   (write-tokens
     [_ ts w]
-    (.write w "<tokens>")
+    (.write w "<tokens>\n")
     (doseq [t ts]
-      (.write w (token-to-xml-element t)))
+      (.write w (str "  " (token-to-xml-element t) "\n")))
     (.write w "</tokens>")))
 
 (defn xml-writer
