@@ -5,7 +5,8 @@
             [jack-compiler.syntax-analyzer.core :as sa]
             [jack-compiler.syntax-analyzer.lexed-source :refer [->LexedSource]]
             [clojure.string :as s]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [me.raynes.fs :as fs]))
 
 
 (def test-src
@@ -29,6 +30,12 @@
   <symbol> } </symbol>
 </tokens>")
 
+(defn delete-if-exists
+  "Deletes path if it exists"
+  [path]
+  (if (fs/exists? path)
+    (fs/delete path)))
+
 (deftest write-tokens-test
   (testing "Represents token seq as xml string"
     (let [tw (xml-writer)
@@ -45,6 +52,7 @@
           src-path "test/test_files/SampleIfBlock.jack"
           out-path "test/test_files/SampleIfBlock.xml"
           ls (->LexedSource src-path ts)]
+      (delete-if-exists out-path)
       (sa/handle-lexed-source xw ls)
-      (is (= true (.exists (io/file out-path))))
+      (is (= true (fs/exists? out-path)))
       (is (= test-output (slurp out-path))))))
