@@ -35,7 +35,7 @@
   "Writes tokens to an output xml file corresponding
   to the in-path."
   [tw in-path tokens]
-  (let [out-path (file/get-output-path-for-file in-path ".xml")]
+  (let [out-path (file/get-output-path-for-file in-path "T_Gen.xml")]
     (with-open [w (io/writer out-path)]
       (sa/write-tokens tw tokens w))))
 

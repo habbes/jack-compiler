@@ -50,7 +50,7 @@
     (let [xw (xml-writer)
           ts (lx/token-seq test-src)
           src-path "test/test_files/SampleIfBlock.jack"
-          out-path "test/test_files/SampleIfBlock.xml"
+          out-path "test/test_files/SampleIfBlockT_Gen.xml"
           ls (->LexedSource src-path ts)]
       (delete-if-exists out-path)
       (sa/handle-lexed-source xw ls)
