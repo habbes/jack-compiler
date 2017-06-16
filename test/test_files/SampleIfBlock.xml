@@ -1,0 +1,15 @@
+<tokens>
+  <keyword> if </keyword>
+  <symbol> ( </symbol>
+  <identifier> x </identifier>
+  <symbol> &lt; </symbol>
+  <integerConstant> 0 </integerConstant>
+  <symbol> ) </symbol>
+  <symbol> { </symbol>
+  <keyword> let </keyword>
+  <identifier> state </identifier>
+  <symbol> = </symbol>
+  <stringConstant> negative </stringConstant>
+  <symbol> ; </symbol>
+  <symbol> } </symbol>
+</tokens>

@@ -3,7 +3,9 @@
             [jack-compiler.syntax-analyzer.xml-writer :refer :all]
             [jack-compiler.syntax-analyzer.lexer :as lx]
             [jack-compiler.syntax-analyzer.core :as sa]
-            [clojure.string :as s]))
+            [jack-compiler.syntax-analyzer.lexed-source :refer [->LexedSource]]
+            [clojure.string :as s]
+            [clojure.java.io :as io]))
 
 
 (def test-src
@@ -35,3 +37,14 @@
           expected test-output]
       (sa/write-tokens tw ts w)
       (is (= (.toString w) expected)))))
+
+(deftest handle-lexed-source-test
+  (testing "Writes tokens as xml to xml file based on source path"
+    (let [xw (xml-writer)
+          ts (lx/token-seq test-src)
+          src-path "test/test_files/SampleIfBlock.jack"
+          out-path "test/test_files/SampleIfBlock.xml"
+          ls (->LexedSource src-path ts)]
+      (sa/handle-lexed-source xw ls)
+      (is (= true (.exists (io/file out-path))))
+      (is (= test-output (slurp out-path))))))
