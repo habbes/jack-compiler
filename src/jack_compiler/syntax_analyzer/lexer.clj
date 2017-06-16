@@ -5,8 +5,9 @@
 
 (def token-rules
   [[#"^(\s+)" :whitespace]
-   [#"^(//\.*)" :whitespace]
-   ;TODO: add regex for multiline comment as whitespace
+   [#"^(//.*)" :whitespace]
+   ;multiline comment
+   [#"^(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)" :whitespace]
 
    [#"^(class)" :keyword]
    [#"^(constructor)" :keyword]
