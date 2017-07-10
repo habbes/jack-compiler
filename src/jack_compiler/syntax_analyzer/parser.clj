@@ -58,4 +58,5 @@
         [subrs ts] (parse-* parse-subroutine-dec)
         [close-br ts] (consume-terminal ts :symbol "}")]
     (pt/->ParseTree :class ((comp vec flatten conj)
-                            cls id open-br vars subrs close-br) nil)))
+                            cls id open-br vars subrs close-br)
+                    nil)))
