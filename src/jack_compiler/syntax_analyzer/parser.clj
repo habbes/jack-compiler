@@ -6,7 +6,7 @@
   ([]
    (throw-parser-error "Parser error"))
   ([msg]
-   (throw (ex-info msg))))
+   (throw (ex-info msg {}))))
 
 (defn consume-token
   "Consumes the next token from the seq. Returns a vector
@@ -24,13 +24,13 @@
      (if (tk/is-type? t t-type)
        [(pt/->ParseTree t-type nil (:value t)) rest-ts]
        (throw-parser-error
-         (str  (name t-type) " expected but found " (:type t) (:value t))))))
+         (str  (name t-type) " expected but found " (name (:type t)) " "(:value t))))))
   ([ts t-type value]
    (let [[node rest-ts] (consume-terminal ts t-type)]
-     (if (= (:value node))
-       node
+     (if (= (:value node) value)
+       [node rest-ts]
        (throw-parser-error
-         (str value "expected but found " (:value node)))))))
+         (str value " expected but found " (:value node)))))))
 
 (defn parse-class-var-dec
   [ts]
