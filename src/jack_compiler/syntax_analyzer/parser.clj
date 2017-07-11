@@ -23,13 +23,13 @@
    (let [[t rest-ts] (consume-token ts)]
      (if (tk/is-type? t t-type)
        [(pt/->ParseTree t-type nil (:value t)) rest-ts]
-       (throw-parse-error
+       (throw-parser-error
          (str  (name t-type) " expected but found " (:type t) (:value t))))))
   ([ts t-type value]
-   (let [[node rest-ts] (consume-keyword ts t-type)]
+   (let [[node rest-ts] (consume-terminal ts t-type)]
      (if (= (:value node))
        node
-       (throw-parse-error
+       (throw-parser-error
          (str value "expected but found " (:value node)))))))
 
 (defn parse-class-var-dec
