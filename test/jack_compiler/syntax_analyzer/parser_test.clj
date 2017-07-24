@@ -27,11 +27,11 @@
       (is (thrown-with-msg? Exception
                             #"symbol expected but found keyword int"
                             (consume-terminal ts :symbol))))
-    (testing "Returns ParseTree node from matched token and value and remaining sq"
-      (let [[p ts-rest] (consume-terminal ts :keyword "int")]
+    (testing "Returns ParseTree node from matched token and values and remaining sq"
+      (let [[p ts-rest] (consume-terminal ts :keyword ["int" "boolean"])]
         (is (= p (ptc :keyword nil "int")))
         (is (= ts-rest [(tkc :identifier "x")]))))
     (testing "Throws exception if unexpected value"
       (is (thrown-with-msg? Exception
-                            #"class expected but found int"
-                            (consume-terminal ts :keyword "class"))))))
+                            #"method or function expected but found int"
+                            (consume-terminal ts :keyword ["method" "function"]))))))
