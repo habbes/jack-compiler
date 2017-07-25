@@ -4,10 +4,16 @@
             [clojure.string :as s]))
 
 (defn throw-parser-error
+  "Throws exception with specifed message"
   ([]
    (throw-parser-error "Parser error"))
   ([msg]
    (throw (ex-info msg {}))))
+
+(defn nodes-vec
+  "Returns a linear un-nested vec of all arguments"
+  [& nodes]
+  (apply (partial (comp vec flatten conj) []) nodes))
 
 (defn consume-token
   "Consumes the next token from the seq. Returns a vector
@@ -84,7 +90,7 @@
   (let [[fst ts] (consume-identifier ts)
         [others ts] (consume-comma-var-seq ts)
         [sc ts] (consume-symbol ts [";"])]
-    [(flatten [fst others sc]) ts]))
+    [(nodes-vec fst others sc) ts]))
 
 (defn parse-class-var-dec
   "Parses a classVarDec node"
@@ -92,9 +98,10 @@
   (let [[field ts] (consume-keyword ts ["field" "static"])
         [typ ts] (consume-type ts)
         [vars ts] (consume-var-seq ts)]
-    (pt/->ParseTree :classVarDec ((comp vec flatten conj)
-                                  field typ vars)
-                    nil)))
+    [(pt/->ParseTree :classVarDec
+                     (nodes-vec field typ vars)
+                     nil)
+     ts]))
 
 (defn parse-subroutine-dec
   [ts]
@@ -115,6 +122,7 @@
         [vars ts] (parse-* ts parse-class-var-dec)
         [subrs ts] (parse-* ts parse-subroutine-dec)
         [close-br ts] (consume-symbol ts ["}"])]
-    (pt/->ParseTree :class ((comp vec flatten conj)
-                            cls id open-br vars subrs close-br)
-                    nil)))
+    [(pt/->ParseTree :class
+                     (nodes-vec cls id open-br vars subrs close-br)
+                     nil)
+     ts]))

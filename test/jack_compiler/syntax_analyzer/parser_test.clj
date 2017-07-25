@@ -11,11 +11,14 @@
 
 (deftest consume-token-test
   (testing "Returns first token from seq and remaining seq"
-    (let [tkfn tk/->Token
-          ts [(tkfn :keyword "int") (tkfn :identifier "x")]
+    (let [ts [(tkc :keyword "int") (tkc :identifier "x")]
           [t ts-rest] (consume-token ts)]
-      (is (= t (tkfn :keyword "int")))
-      (is (= ts-rest [(tkfn :identifier "x")])))))
+      (is (= t (tkc :keyword "int")))
+      (is (= ts-rest [(tkc :identifier "x")]))))
+  (testing "Throws exception if no token found"
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (consume-token [])))))
 
 (deftest consume-terminal-test
   (let [ts [(tkc :keyword "int") (tkc :identifier "x")]]
@@ -75,3 +78,74 @@
     (is (thrown-with-msg? Exception
                           #"symbol expected but found identifier x"
                           (consume-comma-var-seq [(tkc :identifier "x")])))))
+
+(deftest consume-var-seq-test
+  (testing "Consumes `varName(,varName)*;`"
+    (testing "with one variable name"
+      (let [ts [(tkc :identifier "x") (tkc :symbol ";")]
+            [ps ts-rest] (consume-var-seq ts)]
+        (is (= ps [(ptc :identifier nil "x") (ptc :symbol nil ";")]))))
+    (testing "with many variable names"
+      (let [ts [(tkc :identifier "x") (tkc :symbol ",")
+                (tkc :identifier "y") (tkc :symbol ",")
+                (tkc :identifier "z") (tkc :symbol ";")]
+            [ps ts-rest] (consume-var-seq ts)]
+        (is (= ps [(ptc :identifier nil "x") (ptc :symbol nil ",")
+                   (ptc :identifier nil "y") (ptc :symbol nil ",")
+                   (ptc :identifier nil "z") (ptc :symbol nil ";")])))))
+  (testing "Throws exception when semicolon missing"
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (consume-var-seq [(tkc :identifier "x")])))
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (consume-var-seq [(tkc :identifier "x")
+                                            (tkc :symbol ",")]))))
+  (testing "Throws exception when wrong tokens found"
+    (is (thrown-with-msg? Exception
+                          #"identifier expected but found symbol"
+                          (consume-var-seq [(tkc :symbol ",")])))
+    (is (thrown-with-msg? Exception
+                          #"identifier expected but found symbol"
+                          (consume-var-seq [(tkc :symbol ";")])))))
+
+(deftest parse-class-var-dec-test
+  (testing "Parses `field|static type varName(,varName)*;`"
+    (testing "with field"
+      (let [ts [(tkc :keyword "field") (tkc :keyword "int")
+                (tkc :identifier "x") (tkc :symbol ",")
+                (tkc :identifier "y") (tkc :symbol ";")]
+            [p ts-rest] (parse-class-var-dec ts)]
+        (is (= p (ptc :classVarDec
+                      [(ptc :keyword nil "field") (ptc :keyword nil "int")
+                       (ptc :identifier nil "x") (ptc :symbol nil ",")
+                       (ptc :identifier nil "y") (ptc :symbol nil ";")]
+                      nil)))))
+    (testing "with static"
+      (let [ts [(tkc :keyword "static") (tkc :identifier "MyClass")
+                (tkc :identifier "x") (tkc :symbol ";")]
+            [p ts-rest] (parse-class-var-dec ts)]
+        (is (= p (ptc :classVarDec
+                      [(ptc :keyword nil "static") (ptc :identifier nil "MyClass")
+                       (ptc :identifier nil "x") (ptc :symbol nil ";")]
+                      nil))))))
+  (testing "Throws exception when wrong keyword used"
+    (is (thrown-with-msg? Exception
+                          #"field or static expected but found let"
+                          (parse-class-var-dec [(tkc :keyword "let")]))))
+  (testing "Throws exception when token sequence is wrong"
+    ;; type missing
+    (is (thrown-with-msg? Exception
+                          #"identifier expected but found symbol"
+                          (parse-class-var-dec [(tkc :keyword "field")
+                                                (tkc :identifier "x")
+                                                (tkc :symbol ";")])))
+    ;; no variables
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (parse-class-var-dec [(tkc :keyword "field")
+                                                (tkc :keyword "int")])))
+    ;; no type or vars
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (parse-class-var-dec [(tkc :keyword "field")])))))
