@@ -11,9 +11,12 @@
 
 (defn consume-token
   "Consumes the next token from the seq. Returns a vector
-  of the consumed token and the remaining tokens"
+  of the consumed token and the remaining tokens.
+  Throws exception if no token found"
   [[t & ts]]
-  [t ts])
+  (if (nil? t)
+    (throw-parser-error "unexpected end of stream")
+    [t ts]))
 
 (defn consume-terminal
   "Consumes a terminal node of the specified type from ts.
