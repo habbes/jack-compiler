@@ -35,3 +35,21 @@
       (is (thrown-with-msg? Exception
                             #"method or function expected but found int"
                             (consume-terminal ts :keyword ["method" "function"]))))))
+
+(deftest consume-type-test
+  (testing "Consumes int, boolean or char keyword into ParseTree"
+    (doseq [k ["int" "char" "boolean"]]
+      (let [ts [(tkc :keyword k)]
+            [p ts-rest] (consume-type ts)]
+        (is (= p (ptc :keyword nil k))))))
+  (testing "Consumes identifier"
+    (let [ts [(tkc :identifier "MyClass")]
+          [p ts-rest] (consume-type ts)]
+      (is (= p (ptc :identifier nil "MyClass")))))
+  (testing "Throws exception if neither type keyword nor identifier"
+    (is (thrown-with-msg? Exception
+                          #"int or char or boolean expected but found let"
+                          (consume-type [(tkc :keyword "let")])))
+    (is (thrown-with-msg? Exception
+                          #"identifier expected but found symbol"
+                          (consume-type [(tkc :symbol "{")])))))
