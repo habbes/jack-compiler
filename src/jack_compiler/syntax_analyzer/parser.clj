@@ -61,7 +61,8 @@
     (consume-identifier ts)))
 
 (defn consume-comma-var-seq
-  "Consume 0 or more pairs of comma followed by a var name.
+  "Consume 0 or more pairs of comma followed by a var name
+  until a semicolon is found.
   Returns a seq of the consumed tokens and seq of remaining
   tokens."
   ([ts]

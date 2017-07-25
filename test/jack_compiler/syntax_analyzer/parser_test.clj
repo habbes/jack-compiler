@@ -53,3 +53,25 @@
     (is (thrown-with-msg? Exception
                           #"identifier expected but found symbol"
                           (consume-type [(tkc :symbol "{")])))))
+
+(deftest consume-comma-var-seq-test
+  (testing "Consumes a seq of comma and var name until a semicolon is found"
+    (let [ts [(tkc :symbol ",") (tkc :identifier "x")
+              (tkc :symbol ",") (tkc :identifier "y")
+              (tkc :symbol ";")]
+          [ps ts-rest] (consume-comma-var-seq ts)]
+      (is (= ps [(ptc :symbol nil ",") (ptc :identifier nil "x")
+                 (ptc :symbol nil ",") (ptc :identifier nil "y")]))
+      (is (= ts-rest [(tkc :symbol ";")]))))
+  (testing "Returns empty vec if semicolon found immediately"
+    (let [ts [(tkc :symbol ";")]
+          [ps ts-rest] (consume-comma-var-seq ts)]
+      (is (= ps []))
+      (is (= ts-rest [(tkc :symbol ";")]))))
+  (testing "Throws exception when wrong tokens found"
+    (is (thrown-with-msg? Exception
+                          #"identifier expected but found symbol"
+                          (consume-comma-var-seq [(tkc :symbol ",") (tkc :symbol ";")])))
+    (is (thrown-with-msg? Exception
+                          #"symbol expected but found identifier x"
+                          (consume-comma-var-seq [(tkc :identifier "x")])))))
