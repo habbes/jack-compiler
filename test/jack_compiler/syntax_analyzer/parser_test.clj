@@ -164,3 +164,35 @@
     (is (thrown-with-msg? Exception
                           #"unexpected end of stream"
                           (parse-class-var-dec [(tkc :keyword "field")])))))
+
+(deftest parse-parameter-list-test
+  (testing "Parses `( type varName (',' type varName)* )?`"
+    (testing "with no parameters"
+      (let [ts [(tkc :symbol ")")]
+            [p ts] (parse-parameter-list ts)]
+        (is (= p (ptc :parameterList [] nil)))
+        (is (= ts [(tkc :symbol ")")]))))
+    (testing "with one parameter"
+      (let [ts [(tkc :keyword "int") (tkc :identifier "x")
+                (tkc :symbol ")")]
+            [p ts] (parse-parameter-list ts)]
+        (is (= p (ptc :parameterList
+                      [(ptc :keyword nil "int") (ptc :identifier nil "x")]
+                      nil)))
+        (is (= ts [(tkc :symbol ")")]))))
+    (testing "with multiple params"
+      (let [ts [(tkc :keyword "int") (tkc :identifier "x")
+                (tkc :symbol ",")
+                (tkc :identifier "Square") (tkc :identifier "sq")
+                (tkc :symbol ",")
+                (tkc :keyword "boolean") (tkc :identifier "check")
+                (tkc :symbol ")")]
+            [p ts] (parse-parameter-list ts)]
+        (is (= p (ptc :parameterList
+                      [(ptc :keyword nil "int") (ptc :identifier nil "x")
+                       (ptc :symbol nil ",")
+                       (ptc :identifier nil "Square") (ptc :identifier nil "sq")
+                       (ptc :symbol nil ",")
+                       (ptc :keyword nil "boolean") (ptc :identifier nil "check")]
+                      nil)))
+        (is (= ts [(tkc :symbol ")")]))))))

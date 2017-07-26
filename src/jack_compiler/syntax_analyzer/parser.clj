@@ -139,17 +139,20 @@
   for parameter list"
   [ts]
   (consume-* ts
-             consume-comma-type-var*
+             consume-comma-type-var
              #(is-next-value? % ")")))
 
 (defn parse-parameter-list
   "Parses a subroutine parameter list"
   [ts]
-  (let [[open-br ts] (consume-symbol ts ["("])
-        [fst ts] (consume-type-var ts)
-        [others ts] (consume-comma-type-var-seq ts)
-        [close-br ts] (consume-symbol ts [")"])]
-    [(nodes-vec open-br fst others close-br) ts]))
+  (if (is-next-value? ts ")")
+    [(pt/->ParseTree :parameterList [] nil) ts]
+    (let [[fst ts] (consume-type-var ts)
+          [others ts] (consume-comma-type-var-seq ts)]
+      [(pt/->ParseTree :parameterList
+                       (nodes-vec fst others)
+                       nil)
+       ts])))
 
 (defn parse-class-var-dec
   "Parses a classVarDec node"
