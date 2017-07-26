@@ -24,6 +24,16 @@
     (throw-parser-error "unexpected end of stream")
     [t ts]))
 
+(defn is-next-value?
+  "Checks whether the next token has the specified value"
+  [[{v :value}] value]
+  (= v value))
+
+(defn is-next-type?
+  "Checks whether the next token in ts has the specified type"
+  [[{t :type}] typ]
+  (= t typ))
+
 (defn consume-*
   "Consumes 0 or more instances of a program structure
   based on the consumer function f applied repeatedly to
@@ -78,8 +88,8 @@
 (defn consume-type
   "Consumes next token from ts if it's type name keyword
   or an identifier"
-  [[t :as ts]]
-  (if (tk/is-type? t :keyword)
+  [ts]
+  (if (is-next-type? ts :keyword)
     (consume-keyword ts ["int" "char" "boolean"])
     (consume-identifier ts)))
 
@@ -98,7 +108,7 @@
   [ts]
   (consume-* ts
              consume-comma-var
-             (comp #(tk/is-value? % ";") first)))
+             #(is-next-value? % ";")))
 
 (defn consume-var-seq
   "Consumes a sequence of var names separated by a comma
@@ -109,6 +119,13 @@
         [sc ts] (consume-symbol ts [";"])]
     [(nodes-vec fst others sc) ts]))
 
+(defn consume-type-var
+  "Consumes a `type varName` combination"
+  [ts]
+  (let [[typ ts] (consume-type ts)
+        [iden ts] (consume-identifier ts)]
+    [[typ iden] ts]))
+
 (defn consume-comma-type-var
   "Consumes `',' type varName` combination"
   [ts]
@@ -116,6 +133,23 @@
         [typ ts] (consume-type ts)
         [iden ts] (consume-identifier ts)]
     [[comma typ iden] ts]))
+
+(defn consume-comma-type-var-seq
+  "Consumes a `(',' type varName)*` sequence for
+  for parameter list"
+  [ts]
+  (consume-* ts
+             consume-comma-type-var*
+             #(is-next-value? % ")")))
+
+(defn parse-parameter-list
+  "Parses a subroutine parameter list"
+  [ts]
+  (let [[open-br ts] (consume-symbol ts ["("])
+        [fst ts] (consume-type-var ts)
+        [others ts] (consume-comma-type-var-seq ts)
+        [close-br ts] (consume-symbol ts [")"])]
+    [(nodes-vec open-br fst others close-br) ts]))
 
 (defn parse-class-var-dec
   "Parses a classVarDec node"
