@@ -56,7 +56,7 @@
   ([ts t-type]
    (let [[t rest-ts] (consume-token ts)]
      (if (tk/is-type? t t-type)
-       [(pt/->ParseTree t-type nil (:value t)) rest-ts]
+       [(pt/parse-tree t-type nil (:value t)) rest-ts]
        (throw-parser-error
          (str  (name t-type) " expected but found " (name (:type t)) " "(:value t))))))
   ([ts t-type values]
@@ -159,27 +159,14 @@
              consume-comma-type-var
              #(is-next-value? % ")")))
 
-(defn parse-parameter-list
-  "Parses a subroutine parameter list"
-  [ts]
-  (if (is-next-value? ts ")")
-    [(pt/->ParseTree :parameterList [] nil) ts]
-    (let [[fst ts] (consume-type-var ts)
-          [others ts] (consume-comma-type-var-seq ts)]
-      [(pt/->ParseTree :parameterList
-                       (nodes-vec fst others)
-                       nil)
-       ts])))
-
 (defn parse-class-var-dec
   "Parses a classVarDec node"
   [ts]
   (let [[field ts] (consume-keyword ts ["field" "static"])
         [typ ts] (consume-type ts)
         [vars ts] (consume-var-seq ts)]
-    [(pt/->ParseTree :classVarDec
-                     (nodes-vec field typ vars)
-                     nil)
+    [(pt/parse-tree :classVarDec
+                    (nodes-vec field typ vars))
      ts]))
 
 (defn parse-var-dec
@@ -191,6 +178,17 @@
     [(pt/parse-tree :varDec
                     (nodes-vec kw typ vars))
      ts]))
+
+(defn parse-parameter-list
+  "Parses a subroutine parameter list"
+  [ts]
+  (if (is-next-value? ts ")")
+    [(pt/parse-tree :parameterList) ts]
+    (let [[fst ts] (consume-type-var ts)
+          [others ts] (consume-comma-type-var-seq ts)]
+      [(pt/parse-tree :parameterList
+                      (nodes-vec fst others))
+       ts])))
 
 (defn parse-subroutine-dec
   [ts]
@@ -211,7 +209,6 @@
         [vars ts] (consume-* ts parse-class-var-dec)
         [subrs ts] (consume-* ts parse-subroutine-dec)
         [close-br ts] (consume-symbol ts ["}"])]
-    [(pt/->ParseTree :class
-                     (nodes-vec cls id open-br vars subrs close-br)
-                     nil)
+    [(pt/parse-tree :class
+                    (nodes-vec cls id open-br vars subrs close-br))
      ts]))

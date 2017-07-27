@@ -7,7 +7,7 @@
 ; shortcut for token constructor
 (def tkc tk/->Token)
 ; shortcut for ParseTree constructor
-(def ptc pt/->ParseTree)
+(def ptc pt/parse-tree)
 
 (deftest consume-token-test
   (testing "Returns first token from seq and remaining seq"
