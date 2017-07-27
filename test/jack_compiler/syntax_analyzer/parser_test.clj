@@ -72,6 +72,48 @@
                           #"identifier expected but found symbol"
                           (consume-type [(tkc :symbol "{")])))))
 
+(deftest consume-op-test
+  (testing "Consumes +,-,*,/,&,|,<,>,= into ParseTree"
+    (doseq [op ["+" "-" "*" "-" "*" "/" "&" "|" "<" ">" "="]]
+      (let [ts [(tkc :symbol op)]
+            [p ts-rest] (consume-op ts)]
+        (is (= p (ptc :symbol nil op))))))
+  (testing "Throws exception if incorrect token found"
+    (is (thrown-with-msg? Exception
+                          #"symbol expected but found keyword let"
+                          (consume-op [(tkc :keyword "let")])))
+    (is (thrown-with-msg? Exception
+                          #"expected but found \{"
+                          (consume-op [(tkc :symbol "{")])))))
+
+(deftest consume-unary-op-test
+  (testing "Consumes - or ~ into ParseTree"
+    (doseq [op ["-" "~"]]
+      (let [ts [(tkc :symbol op)]
+            [p ts-rest] (consume-unary-op ts)]
+        (is (= p (ptc :symbol nil op))))))
+  (testing "Throws exception if incorrect token found"
+    (is (thrown-with-msg? Exception
+                          #"symbol expected but found keyword let"
+                          (consume-unary-op [(tkc :keyword "let")])))
+    (is (thrown-with-msg? Exception
+                          #"- or ~ expected but found +"
+                          (consume-unary-op [(tkc :symbol "+")])))))
+
+(deftest consume-keyword-constant-test
+  (testing "Consumes true, false, null or this into ParseTree"
+    (doseq [k ["true" "false" "null" "this"]]
+      (let [ts [(tkc :keyword k)]
+            [p ts-rest] (consume-keyword-constant ts)]
+        (is (= p (ptc :keyword nil k))))))
+  (testing "Throws exception if incorrect token found"
+    (is (thrown-with-msg? Exception
+                          #"true or false or null or this expected but found let"
+                          (consume-keyword-constant [(tkc :keyword "let")])))
+    (is (thrown-with-msg? Exception
+                          #"keyword expected but found identifier x"
+                          (consume-keyword-constant [(tkc :identifier "x")])))))
+
 (deftest consume-comma-var-seq-test
   (testing "Consumes a seq of comma and var name until a semicolon is found"
     (let [ts [(tkc :symbol ",") (tkc :identifier "x")
