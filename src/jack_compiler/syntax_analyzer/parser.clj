@@ -165,6 +165,16 @@
                      nil)
      ts]))
 
+(defn parse-var-dec
+  "Parses a varDec node `'var' type varName (',' varName)*';'`"
+  [ts]
+  (let [[kw ts] (consume-keyword ts ["var"])
+        [typ ts] (consume-type ts)
+        [vars ts] (consume-var-seq ts)]
+    [(pt/parse-tree :varDec
+                    (nodes-vec kw typ vars))
+     ts]))
+
 (defn parse-subroutine-dec
   [ts]
   (prn "TODO parse subroutine-dec")
