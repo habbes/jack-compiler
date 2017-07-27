@@ -207,6 +207,45 @@
                           #"unexpected end of stream"
                           (parse-class-var-dec [(tkc :keyword "field")])))))
 
+(deftest parse-var-dec-test
+  (testing "Parses `'var' type varName(,varName)*;`"
+    (testing "with multiple vars"
+      (let [ts [(tkc :keyword "var") (tkc :keyword "int")
+                (tkc :identifier "x") (tkc :symbol ",")
+                (tkc :identifier "y") (tkc :symbol ";")]
+            [p ts-rest] (parse-var-dec ts)]
+        (is (= p (ptc :varDec
+                      [(ptc :keyword nil "var") (ptc :keyword nil "int")
+                       (ptc :identifier nil "x") (ptc :symbol nil ",")
+                       (ptc :identifier nil "y") (ptc :symbol nil ";")])))))
+    (testing "with one var"
+      (let [ts [(tkc :keyword "var") (tkc :identifier "MyClass")
+                (tkc :identifier "x") (tkc :symbol ";")]
+            [p ts-rest] (parse-var-dec ts)]
+        (is (= p (ptc :varDec
+                      [(ptc :keyword nil "var") (ptc :identifier nil "MyClass")
+                       (ptc :identifier nil "x") (ptc :symbol nil ";")]))))))
+  (testing "Throws exception when wrong keyword used"
+    (is (thrown-with-msg? Exception
+                          #"var expected but found field"
+                          (parse-var-dec [(tkc :keyword "field")]))))
+  (testing "Throws exception when token sequence is wrong"
+    ;; type missing
+    (is (thrown-with-msg? Exception
+                          #"identifier expected but found symbol"
+                          (parse-var-dec [(tkc :keyword "var")
+                                                (tkc :identifier "x")
+                                                (tkc :symbol ";")])))
+    ;; no variables
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (parse-var-dec [(tkc :keyword "var")
+                                                (tkc :keyword "int")])))
+    ;; no type or vars
+    (is (thrown-with-msg? Exception
+                          #"unexpected end of stream"
+                          (parse-var-dec [(tkc :keyword "var")])))))
+
 (deftest parse-parameter-list-test
   (testing "Parses `( type varName (',' type varName)* )?`"
     (testing "with no parameters"
