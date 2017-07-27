@@ -93,6 +93,23 @@
     (consume-keyword ts ["int" "char" "boolean"])
     (consume-identifier ts)))
 
+(defn consume-op
+  "Consumes a binary operator node"
+  [ts]
+  (consume-symbol ts ["+" "-" "*" "/" "&"
+                      "|" "<" ">" "="]))
+
+(defn consume-unary-op
+  "Consumes a unary operator node"
+  [ts]
+  (consume-symbol ts ["-" "~"]))
+
+(defn consume-keyword-constant
+  "Consumes a keyword constant value"
+  [ts]
+  (consume-keyword ts ["true" "false"
+                       "null" "this"]))
+
 (defn consume-comma-var
   "Consumes a `',' varName` combination"
   [ts]
