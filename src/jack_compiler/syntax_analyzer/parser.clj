@@ -219,7 +219,7 @@
   [ts]
   (consume-* ts
              consume-op-term
-             is-next-op?))
+             (complement is-next-op?)))
 
 (defn parse-expression
   "Parses an expression"
