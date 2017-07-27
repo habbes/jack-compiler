@@ -25,14 +25,22 @@
     [t ts]))
 
 (defn is-next-value?
-  "Checks whether the next token has the specified value"
-  [[{v :value}] value]
-  (= v value))
+  "Checks whether the next token in ts matches values.
+  If values is a list, then it must match one of the values."
+  [[{v :value}] values]
+  (let [values (if (sequential? values) values [values])]
+    (some #{v} values)))
 
 (defn is-next-type?
   "Checks whether the next token in ts has the specified type"
   [[{t :type}] typ]
   (= t typ))
+
+(defn is-next-op?
+  "Checks whether the next token is a binary operator"
+  [ts]
+  (is-next-value? ts ["+" "-" "*" "/" "&"
+                      "|" "<" ">" "="]))
 
 (defn consume-*
   "Consumes 0 or more instances of a program structure
@@ -189,6 +197,38 @@
       [(pt/parse-tree :parameterList
                       (nodes-vec fst others))
        ts])))
+
+(defn parse-term
+  "Parses a term node"
+  ;; TODO: simplified version that only parses var names
+  [ts]
+  (let [[iden ts] (consume-identifier ts)]
+    [(pt/parse-tree :term [iden])
+     ts]))
+
+(defn consume-op-term
+  "Consumes an `op term` combination"
+  [ts]
+  (let [[op ts] (consume-op ts)
+        [term ts] (parse-term ts)]
+    [(nodes-vec op term) ts]))
+
+
+(defn consume-op-term-seq
+  "Consumes a `(op term)*` sequence"
+  [ts]
+  (consume-* ts
+             consume-op-term
+             is-next-op?))
+
+(defn parse-expression
+  "Parses an expression"
+  [ts]
+  (let [[fst ts] (parse-term ts)
+        [others ts] (consume-op-term-seq)]
+    [(pt/parse-tree :expression
+                    (nodes-vec fst others))
+     ts]))
 
 (defn parse-subroutine-dec
   [ts]
