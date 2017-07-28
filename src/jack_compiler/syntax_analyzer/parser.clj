@@ -104,8 +104,9 @@
 (defn consume-op
   "Consumes a binary operator node"
   [ts]
-  (consume-symbol ts ["+" "-" "*" "/" "&"
-                      "|" "<" ">" "="]))
+  (consume-symbol
+    ts
+    ["+" "-" "*" "/" "&" "|" "<" ">" "="]))
 
 (defn consume-unary-op
   "Consumes a unary operator node"
@@ -115,8 +116,9 @@
 (defn consume-keyword-constant
   "Consumes a keyword constant value"
   [ts]
-  (consume-keyword ts ["true" "false"
-                       "null" "this"]))
+  (consume-keyword
+    ts
+    ["true" "false" "null" "this"]))
 
 (defn consume-comma-var
   "Consumes a `',' varName` combination"
@@ -131,9 +133,10 @@
   Returns a seq of the consumed tokens and seq of remaining
   tokens."
   [ts]
-  (consume-* ts
-             consume-comma-var
-             #(is-next-value? % ";")))
+  (consume-*
+    ts
+    consume-comma-var
+    #(is-next-value? % ";")))
 
 (defn consume-var-seq
   "Consumes a sequence of var names separated by a comma
@@ -173,8 +176,9 @@
   (let [[field ts] (consume-keyword ts ["field" "static"])
         [typ ts] (consume-type ts)
         [vars ts] (consume-var-seq ts)]
-    [(pt/parse-tree :classVarDec
-                    (nodes-vec field typ vars))
+    [(pt/parse-tree
+       :classVarDec
+       (nodes-vec field typ vars))
      ts]))
 
 (defn parse-var-dec
@@ -183,8 +187,9 @@
   (let [[kw ts] (consume-keyword ts ["var"])
         [typ ts] (consume-type ts)
         [vars ts] (consume-var-seq ts)]
-    [(pt/parse-tree :varDec
-                    (nodes-vec kw typ vars))
+    [(pt/parse-tree
+       :varDec
+       (nodes-vec kw typ vars))
      ts]))
 
 (defn parse-parameter-list
@@ -194,8 +199,9 @@
     [(pt/parse-tree :parameterList) ts]
     (let [[fst ts] (consume-type-var ts)
           [others ts] (consume-comma-type-var-seq ts)]
-      [(pt/parse-tree :parameterList
-                      (nodes-vec fst others))
+      [(pt/parse-tree
+         :parameterList
+         (nodes-vec fst others))
        ts])))
 
 (defn parse-term
@@ -217,17 +223,19 @@
 (defn consume-op-term-seq
   "Consumes a `(op term)*` sequence"
   [ts]
-  (consume-* ts
-             consume-op-term
-             (complement is-next-op?)))
+  (consume-*
+    ts
+    consume-op-term
+    (complement is-next-op?)))
 
 (defn parse-expression
   "Parses an expression"
   [ts]
   (let [[fst ts] (parse-term ts)
         [others ts] (consume-op-term-seq ts)]
-    [(pt/parse-tree :expression
-                    (nodes-vec fst others))
+    [(pt/parse-tree
+       :expression
+       (nodes-vec fst others))
      ts]))
 
 (defn parse-subroutine-dec
@@ -249,6 +257,7 @@
         [vars ts] (consume-* ts parse-class-var-dec)
         [subrs ts] (consume-* ts parse-subroutine-dec)
         [close-br ts] (consume-symbol ts ["}"])]
-    [(pt/parse-tree :class
-                    (nodes-vec cls id open-br vars subrs close-br))
+    [(pt/parse-tree
+       :class
+       (nodes-vec cls id open-br vars subrs close-br))
      ts]))
