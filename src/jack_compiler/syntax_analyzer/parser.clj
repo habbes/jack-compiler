@@ -225,7 +225,7 @@
   "Parses an expression"
   [ts]
   (let [[fst ts] (parse-term ts)
-        [others ts] (consume-op-term-seq)]
+        [others ts] (consume-op-term-seq ts)]
     [(pt/parse-tree :expression
                     (nodes-vec fst others))
      ts]))

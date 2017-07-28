@@ -277,3 +277,44 @@
                        (ptc :keyword nil "boolean") (ptc :identifier nil "check")]
                       nil)))
         (is (= ts [(tkc :symbol ")")]))))))
+
+
+(deftest parse-term-test
+  (testing "Parses varName"
+    (let [ts [(tkc :identifier "x") (tkc :symbol ",")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :identifier nil "x")])))
+      (is (= ts [(tkc :symbol ",")])))))
+
+(deftest parse-expression-test
+  (testing "Parses 'term'"
+    (let [ts [(tkc :identifier "x") (tkc :symbol ";")]
+          [p ts] (parse-expression ts)]
+      (is (= p (ptc :expression
+                    [(ptc :term
+                          [(ptc :identifier nil "x")])])))
+      (is (= ts [(tkc :symbol ";")]))))
+  (testing "Parses 'term op term'"
+    (let [ts [(tkc :identifier "x") (tkc :symbol "+")
+              (tkc :identifier "y") (tkc :symbol ";")]
+          [p ts] (parse-expression ts)]
+      (is (= p
+             (ptc :expression
+                  [(ptc :term [(ptc :identifier nil "x")])
+                   (ptc :symbol nil "+")
+                   (ptc :term [(ptc :identifier nil "y")])])))
+      (is (= ts [(tkc :symbol ";")]))))
+  (testing "Parses 'term (op term)*'"
+    (let [ts [(tkc :identifier "x") (tkc :symbol "+")
+              (tkc :identifier "y") (tkc :symbol "*")
+              (tkc :identifier "z") (tkc :symbol ";")]
+          [p ts] (parse-expression ts)]
+      (is (= p
+             (ptc :expression
+                  [(ptc :term [(ptc :identifier nil "x")])
+                   (ptc :symbol nil "+")
+                   (ptc :term [(ptc :identifier nil "y")])
+                   (ptc :symbol nil "*")
+                   (ptc :term [(ptc :identifier nil "z")])])))
+      (is (= ts [(tkc :symbol ";")])))))
