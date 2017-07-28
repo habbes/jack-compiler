@@ -39,8 +39,9 @@
 (defn is-next-op?
   "Checks whether the next token is a binary operator"
   [ts]
-  (is-next-value? ts ["+" "-" "*" "/" "&"
-                      "|" "<" ">" "="]))
+  (is-next-value?
+    ts
+    ["+" "-" "*" "/" "&" "|" "<" ">" "="]))
 
 (defn consume-*
   "Consumes 0 or more instances of a program structure
@@ -218,7 +219,6 @@
   (let [[op ts] (consume-op ts)
         [term ts] (parse-term ts)]
     [(nodes-vec op term) ts]))
-
 
 (defn consume-op-term-seq
   "Consumes a `(op term)*` sequence"
