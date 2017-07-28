@@ -39,18 +39,18 @@
                             #"method or function expected but found int"
                             (consume-terminal ts :keyword ["method" "function"]))))))
 
-(deftest consume-*-test
+(deftest consume-until-test
   ;; test consuming a sequence of commas with semicolon as the stop symbol
   (let [f #(consume-symbol % [","])
         stop-f (comp #(tk/is-value? % ";") first)]
     (testing "Consumes sequence of nodes based on parser fn until stop fn passes"
       (let [ts [(tkc :symbol ",") (tkc :symbol ",") (tkc :symbol ";")]
-            [nodes ts] (consume-* ts f stop-f)]
+            [nodes ts] (consume-until ts stop-f f)]
         (is (= nodes [(ptc :symbol nil ",") (ptc :symbol nil ",")]))
         (is (= ts [(tkc :symbol ";")]))))
     (testing "Returns empty vec if stop-fn passes immediately"
       (let [ts [(tkc :symbol ";")]
-            [nodes ts] (consume-* ts f stop-f)]
+            [nodes ts] (consume-until ts stop-f f)]
         (is (= nodes [])
             (= ts [(tkc :symbol ";")]))))))
 

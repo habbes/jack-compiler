@@ -43,19 +43,19 @@
     ts
     ["+" "-" "*" "/" "&" "|" "<" ">" "="]))
 
-(defn consume-*
+(defn consume-until
   "Consumes 0 or more instances of a program structure
   based on the consumer function f applied repeatedly to
   ts untl (stop-f ts) returns true. f should return a vector
   of the parsed nodes and the remaining tokens"
-  ([ts f stop-f]
-   (consume-* ts f stop-f []))
-  ([ts f stop-f nodes]
+  ([ts stop-f f]
+   (consume-until ts stop-f f []))
+  ([ts stop-f f nodes]
    (if (stop-f ts)
      [nodes ts]
      (let [[new-nodes ts] (f ts)
            nodes (nodes-vec nodes new-nodes)]
-       (recur ts f stop-f nodes)))))
+       (recur ts stop-f f nodes)))))
 
 (defn consume-terminal
   "Consumes a terminal node of the specified type from ts.
@@ -134,10 +134,10 @@
   Returns a seq of the consumed tokens and seq of remaining
   tokens."
   [ts]
-  (consume-*
+  (consume-until
     ts
-    consume-comma-var
-    #(is-next-value? % ";")))
+    #(is-next-value? % ";")
+    consume-comma-var))
 
 (defn consume-var-seq
   "Consumes a sequence of var names separated by a comma
@@ -167,9 +167,10 @@
   "Consumes a `(',' type varName)*` sequence for
   for parameter list"
   [ts]
-  (consume-* ts
-             consume-comma-type-var
-             #(is-next-value? % ")")))
+  (consume-until
+    ts
+    #(is-next-value? % ")")
+    consume-comma-type-var))
 
 (defn parse-class-var-dec
   "Parses a classVarDec node"
@@ -223,10 +224,10 @@
 (defn consume-op-term-seq
   "Consumes a `(op term)*` sequence"
   [ts]
-  (consume-*
+  (consume-until
     ts
-    consume-op-term
-    (complement is-next-op?)))
+    (complement is-next-op?)
+    consume-op-term))
 
 (defn parse-expression
   "Parses an expression"
@@ -254,8 +255,8 @@
   (let [[cls ts] (consume-keyword ts ["class"])
         [id ts] (consume-identifier ts)
         [open-br ts] (consume-symbol ts ["{"])
-        [vars ts] (consume-* ts parse-class-var-dec)
-        [subrs ts] (consume-* ts parse-subroutine-dec)
+        [vars ts] (consume-until ts parse-class-var-dec)
+        [subrs ts] (consume-until ts parse-subroutine-dec)
         [close-br ts] (consume-symbol ts ["}"])]
     [(pt/parse-tree
        :class
