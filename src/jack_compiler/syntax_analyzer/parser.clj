@@ -57,7 +57,7 @@
            nodes (nodes-vec nodes new-nodes)]
        (recur ts stop-f f nodes)))))
 
-(defn consume-if
+(defn consume-when
   "Consumes from ts using the specified parser f
   only if (test-f ts) passes. Returns vector of
   parsed nodes and remaining tokens. If (test-f ts)
@@ -257,11 +257,11 @@
         [close-br ts] (consume-symbol ts ["]"])]
     [(nodes-vec open-br ex close-br) ts]))
 
-(defn consume-if-array-index
+(defn consume-when-array-index
   "Consume an array index `[expr]`
   if the next token is '['"
   [ts]
-  (consume-if
+  (consume-when
     ts
     #(is-next-value? % "[")
     consume-array-index))
@@ -271,7 +271,7 @@
   [ts]
   (let [[kw ts] (consume-keyword ts ["let"])
         [iden ts] (consume-identifier ts)
-        [index ts] (consume-if-array-index ts)
+        [index ts] (consume-when-array-index ts)
         [assgn ts] (consume-symbol ts ["="])
         [ex ts] (consume-expression ts)
         [sc ts] (consume-symbol ts [";"])]
@@ -306,11 +306,11 @@
         [stms ts] (consume-statement-block ts)]
     [(nodes-vec kw stms) ts]))
 
-(defn consume-if-else-block
+(defn consume-when-else-block
   "Consumes an else block
   if the next token is 'else'"
   [ts]
-  (consume-if
+  (consume-when
     ts
     #(is-next-value? % ["else"])
     consume-else-block))
@@ -321,7 +321,7 @@
   (let [[kw ts] (consume-keyword ts ["if"])
         [con ts] (consume-condition ts)
         [stms ts] (consume-statement-block ts)
-        [else ts] (consume-if-else-block ts)]
+        [else ts] (consume-when-else-block ts)]
     [(pt/parse-tree
        :ifStatement
        (nodes-vec kw con stms else))
@@ -346,7 +346,7 @@
   "Parses `'return' expression?';'`"
   [ts]
   (let [[rt ts] (consume-keyword ts ["return"])
-        [ex ts] (consume-if
+        [ex ts] (consume-when
                   ts
                   (not #(is-next-value? % [";"]))
                   parse-expression)
