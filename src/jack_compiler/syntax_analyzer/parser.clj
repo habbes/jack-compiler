@@ -342,14 +342,20 @@
   [ts]
   "TODO: implement this")
 
+(defn consume-when-expression
+  "Consumes expression if next token
+  is not a semicolon"
+  [ts]
+  (consume-when
+    ts
+    (not #(is-next-value? % ";"))
+    parse-expression))
+
 (defn parse-return-statement
   "Parses `'return' expression?';'`"
   [ts]
   (let [[rt ts] (consume-keyword ts ["return"])
-        [ex ts] (consume-when
-                  ts
-                  (not #(is-next-value? % [";"]))
-                  parse-expression)
+        [ex ts] (consume-when-expression)
         [sc ts] (consume-symbol ts [";"])]
     [(pt/parse-tree
        :returnStatement
