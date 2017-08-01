@@ -57,6 +57,16 @@
            nodes (nodes-vec nodes new-nodes)]
        (recur ts stop-f f nodes)))))
 
+(defn consume-if
+  "Consumes from ts using the specified parser f
+  only if (test-f ts) passes. Returns vector of
+  parsed nodes and remaining tokens. If (test-f ts)
+  fails, parsed nodes will be an empty vector."
+  [ts test-f f]
+  (if (test-f ts)
+    (f ts)
+    [[] ts]))
+
 (defn consume-terminal
   "Consumes a terminal node of the specified type from ts.
   If values is provided, the node must match both type and be one of values.
@@ -238,6 +248,86 @@
        :expression
        (nodes-vec fst others))
      ts]))
+
+(defn consume-array-index
+  "Consumes an `'['expression']'` combination"
+  [ts]
+  (let [[open-br ts] (consume-symbol ts "[")
+        [ex ts] (parse-expression ts)
+        [close-br ts] (consume-symbol ts "]")]
+    [(nodes-vec open-br ex close-br) ts]))
+
+(defn consume-if-array-index
+  "Consume an array index `[expr]`
+  if the next token is '['"
+  [ts]
+  (consume-if
+    ts
+    #(is-next-value? % "[")
+    consume-array-index))
+
+(defn parse-let-statement
+  "Consumes `'let' varName ('['expression'])?'='expression';'`"
+  [ts]
+  (let [[kw ts] (consume-keyword ts ["let"])
+        [iden ts] (consume-identifier ts)
+        [index ts] (consume-if-array-index ts)
+        [assgn ts] (consume-symbol ts ["="])
+        [ex ts] (consume-expression ts)
+        [sc ts] (consume-symbol ts [";"])]
+    [(pt/parse-tree
+       :letStatement
+       (nodes-vec kw iden index assgn ex sc))
+     ts]))
+
+(defn parse-if-statement
+  [ts]
+  "TODO: implement this")
+
+(defn parse-while-statement
+  [ts]
+  "TODO: implement this")
+
+(defn parse-do-statement
+  [ts]
+  "TODO: implement this")
+
+(defn parse-return-statement
+  "Parses `'return' expression?';'`"
+  [ts]
+  (let [[rt ts] (consume-keyword ts ["return"])
+        [ex ts] (consume-if
+                  ts
+                  (not #(is-next-value? % [";"]))
+                  parse-expression)
+        [sc ts] (consume-symbol ts [";"])]
+    [(pt/parse-tree
+       :returnStatement
+       (nodes-vec rt ex sc))
+     ts]))
+
+(defn parse-statement
+  "Parses a statement"
+  [[{v :value t :type} :as ts]]
+  (let [f (case v
+            "let" parse-let-statement
+            "if" parse-if-statement
+            "while" parse-while-statement
+            "do" parse-do-statement
+            "return" parse-return-statement
+            (throw-parser-error
+              (str "statement expected but found "
+                   (name t) " " v)))]
+    (f ts)))
+
+(defn parse-statements
+  "Parses `statement*`"
+  [ts]
+  (let [[stms ts] (consume-until
+                    ts
+                    #(is-next-value? % ["}"])
+                    parse-statement)]
+    [(pt/parse-tree :statements stms) ts]))
 
 (defn parse-subroutine-dec
   [ts]
