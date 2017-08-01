@@ -252,9 +252,9 @@
 (defn consume-array-index
   "Consumes an `'['expression']'` combination"
   [ts]
-  (let [[open-br ts] (consume-symbol ts "[")
+  (let [[open-br ts] (consume-symbol ts ["["])
         [ex ts] (parse-expression ts)
-        [close-br ts] (consume-symbol ts "]")]
+        [close-br ts] (consume-symbol ts ["]"])]
     [(nodes-vec open-br ex close-br) ts]))
 
 (defn consume-if-array-index
