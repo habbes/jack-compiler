@@ -299,9 +299,33 @@
         [cl-br ts] (consume-symbol ts ["}"])]
     [(nodes-vec op-br stms cl-br)]))
 
-(defn parse-if-statement
+(defn consume-else-block
+  "Consumes `'else''{'statements'}'`"
   [ts]
-  "TODO: implement this")
+  (let [[kw ts] (consume-keyword ts ["else"])
+        [stms ts] (consume-statement-block ts)]
+    [(nodes-vec kw stms) ts]))
+
+(defn consume-if-else-block
+  "Consumes an else block
+  if the next token is 'else'"
+  [ts]
+  (consume-if
+    ts
+    #(is-next-value? % ["else"])
+    consume-else-block))
+
+(defn parse-if-statement
+  "Parses `'if'condition statement-block else-block?`"
+  [ts]
+  (let [[kw ts] (consume-keyword ts ["if"])
+        [con ts] (consume-condition ts)
+        [stms ts] (consume-statement-block ts)
+        [else ts] (consume-if-else-block ts)]
+    [(pt/parse-tree
+       :ifStatement
+       (nodes-vec kw con stms else))
+     ts]))
 
 (defn parse-while-statement
   "Parses `'while''('expression')''{'statements'}'`"
