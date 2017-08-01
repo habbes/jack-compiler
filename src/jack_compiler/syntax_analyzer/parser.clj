@@ -280,13 +280,39 @@
        (nodes-vec kw iden index assgn ex sc))
      ts]))
 
+(defn consume-condition
+  "Consumes a `'('expression')'` as used
+  in condition statements"
+  [ts]
+  (let [[op-br ts] (consume-symbol ts ["("])
+        [ex ts] (parse-expression ts)
+        [cl-br ts] (consume-symbol ts [")"])]
+    [(nodes-vec op-br ex cl-br) ts]))
+
+(declare parse-statements)
+
+(defn consume-statement-block
+  "Consumes `'{'statements'}'`"
+  [ts]
+  (let [[op-br ts] (consume-symbol ts ["{"])
+        [stms ts] (parse-statements ts)
+        [cl-br ts] (consume-symbol ts ["}"])]
+    [(nodes-vec op-br stms cl-br)]))
+
 (defn parse-if-statement
   [ts]
   "TODO: implement this")
 
 (defn parse-while-statement
+  "Parses `'while''('expression')''{'statements'}'`"
   [ts]
-  "TODO: implement this")
+  (let [[kw ts] (consume-keyword ts ["while"])
+        [con ts] (consume-condition ts)
+        [stms ts] (consume-statement-block ts)]
+    [(pt/parse-tree
+       :whileStatement
+       (nodes-vec kw con stms))
+     ts]))
 
 (defn parse-do-statement
   [ts]
