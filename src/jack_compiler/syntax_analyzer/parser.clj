@@ -249,6 +249,46 @@
        (nodes-vec fst others))
      ts]))
 
+(defn consume-comma-expression
+  "Consumes `','expression`"
+  [ts]
+  (let [[comma ts] (consume-symbol ts [","])
+        [ex ts] (parse-expression ts)]
+    [(nodes-vec comma ex) ts]))
+
+(defn consume-comma-expression-seq
+  "Consumes `(','expression)*`
+  until a closing paranthesis"
+  [ts]
+  (consume-until
+    ts
+    #(is-next-value? % ")")
+    consume-comma-expression))
+
+(defn consume-expression-seq
+  "Consumes one or more expressions separated
+  by comma"
+  [ts]
+  (let [[fst ts] (parse-expression ts)
+        [others ts] (parse-expression-list ts)]
+    [(nodes-vec fst others) ts]))
+
+(defn consume-when-expression-seq
+  "Consumes an expression seq if the
+  next token is not a closing parenthesis"
+  [ts]
+  (consume-when
+    ts
+    (not #(is-next-value? % ")"))
+    consume-expression-seq))
+
+(defn parse-expression-list
+  "Parses `(expression (','expression)*)?`
+  when the next token is not a ')'"
+  [ts]
+  (let [[exprs ts] (consume-when-expression-seq)]
+    [(pt/parse-tree :expressionList exprs) ts]))
+
 (defn consume-array-index
   "Consumes an `'['expression']'` combination"
   [ts]
