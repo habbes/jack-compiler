@@ -279,7 +279,7 @@
   [ts]
   (consume-when
     ts
-    (not #(is-next-value? % ")"))
+    (complement #(is-next-value? % ")"))
     consume-expression-seq))
 
 (defn parse-expression-list
@@ -388,7 +388,7 @@
   [ts]
   (consume-when
     ts
-    (not #(is-next-value? % ";"))
+    (complement #(is-next-value? % ";"))
     parse-expression))
 
 (defn parse-return-statement
