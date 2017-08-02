@@ -416,24 +416,25 @@
                    (name t) " " v)))]
     (f ts)))
 
+(defn consume-statement-seq
+  "Consumes 0 or more statements
+  until a '}' is found"
+  [ts]
+  (consume-until
+    ts
+    #(is-next-value? % "}")
+    parse-statement))
+
 (defn parse-statements
   "Parses `statement*`"
   [ts]
-  (let [[stms ts] (consume-until
-                    ts
-                    #(is-next-value? % ["}"])
-                    parse-statement)]
+  (let [[stms ts] (consume-statement-seq ts)]
     [(pt/parse-tree :statements stms) ts]))
 
 (defn parse-subroutine-dec
   [ts]
   (prn "TODO parse subroutine-dec")
   [])
-
-(defn parse-*
-  "Parses 0 or more instances of a program structure node based
-  on the specified parser f."
-  [ts f])
 
 (defn parse-class
   "Parses a class node"
