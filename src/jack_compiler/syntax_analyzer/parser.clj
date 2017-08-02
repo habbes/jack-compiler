@@ -43,6 +43,17 @@
     ts
     ["+" "-" "*" "/" "&" "|" "<" ">" "="]))
 
+(defn is-next-period?
+  "Checks whether the next token is a period '.'"
+  [ts]
+  (is-next-value? ts "."))
+
+(defn after-next
+  "Applies f to the tokens after the direct next one
+  and returns the result"
+  [[_ & next-ts] f]
+  (f next-ts))
+
 (defn consume-until
   "Consumes 0 or more instances of a program structure
   based on the consumer function f applied repeatedly to
@@ -66,6 +77,14 @@
   (if (test-f ts)
     (f ts)
     [[] ts]))
+
+(defn consume-choice
+  "Consumes from ts using f-1 if (choice-f ts) passes
+  otherwise consumes using f-2."
+  [ts choice-f f-1 f-2]
+  (if (choice-f ts)
+    (f-1 ts)
+    (f-2 ts)))
 
 (defn consume-terminal
   "Consumes a terminal node of the specified type from ts.
@@ -215,6 +234,32 @@
          :parameterList
          (nodes-vec fst others))
        ts])))
+
+(defn consume-function-call
+  "Consumes `subroutineName'('expressionList')'"
+  [ts]
+  (let [[id ts] (consume-identifier ts)
+        [op-br ts] (consume-symbol ts ["("])
+        [exprs ts] (parse-expression-list ts)
+        [cl-br ts] (consume-symbol ts [")"])]
+    [(nodes-vec id op-br exprs cl-br) ts]))
+
+(defn consume-method-call
+  "Consumes `(className|varName)'.'functionCall`"
+  [ts]
+  (let [[id ts] (consume-identifier ts)
+        [dot ts] (consume-symbol ts ["."])
+        [func ts] (consume-function-call ts)]
+    [(nodes-vec id dot func) ts]))
+
+(defn consume-subroutine-call
+  "Consumes a standalone method or function call"
+  [ts]
+  (consume-choice
+    ts
+    #(after-next % is-next-period?)
+    consume-method-call
+    consume-function-call))
 
 (defn parse-term
   "Parses a term node"
@@ -379,8 +424,14 @@
      ts]))
 
 (defn parse-do-statement
+  "Parses `'do' subroutineCall`"
   [ts]
-  "TODO: implement this")
+  (let [[kw ts] (consume-keyword ts ["do"])
+        [subr ts] (consume-subroutine-call ts)]
+    [(pt/parse-tree
+       :doStatement
+       (nodes-vec kw subr))
+     ts]))
 
 (defn consume-when-expression
   "Consumes expression if next token
