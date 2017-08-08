@@ -449,7 +449,7 @@
   "Parses `'return' expression?';'`"
   [ts]
   (let [[rt ts] (consume-keyword ts ["return"])
-        [ex ts] (consume-when-expression)
+        [ex ts] (consume-when-expression ts)
         [sc ts] (consume-symbol ts [";"])]
     [(pt/parse-tree
        :returnStatement

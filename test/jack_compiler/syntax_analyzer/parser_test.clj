@@ -514,4 +514,24 @@
                                               [(ptc :identifier nil "y")])])
                                    (ptc :symbol nil ";")])])
                        (ptc :symbol nil "}")])))
-        (is (= ts [(tkc :keyword "let")]))))))
+        (is (= ts [(tkc :keyword "let")])))))
+  (testing "return statement"
+    (testing "Parses return without expression"
+      (let [ts [(tkc :keyword "return") (tkc :symbol ";")
+                (tkc :symbol "}")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :returnStatement
+                      [(ptc :keyword nil "return")
+                       (ptc :symbol nil";")])))
+        (is (= ts [(tkc :symbol "}")]))))
+    (testing "Parses return statement with expression"
+      (let [ts [(tkc :keyword "return") (tkc :identifier "x")
+                (tkc :symbol ";") (tkc :symbol "}")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :returnStatement
+                      [(ptc :keyword nil "return")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "x")])])
+                       (ptc :symbol nil ";")])))
+        (is (= ts [(tkc :symbol "}")]))))))
