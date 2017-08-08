@@ -596,3 +596,39 @@
                                   [(ptc :identifier nil "x")])])
                        (ptc :symbol nil ";")])))
         (is (= ts [(tkc :symbol "}")]))))))
+
+(deftest parse-statements-test
+  (testing "Parses 0 statements when '}' reached first"
+    (let [ts [(tkc :symbol "}")]
+          [p ts] (parse-statements ts)]
+      (is (= p (ptc :statements
+                    [])))
+      (is (= ts [(tkc :symbol "}")]))))
+  (testing "Parses 1 statement"
+    (let [ts [(tkc :keyword "return") (tkc :symbol ";")
+              (tkc :symbol "}")]
+          [p ts] (parse-statements ts)]
+      (is (= p (ptc :statements
+                    [(ptc :returnStatement
+                          [(ptc :keyword nil "return")
+                           (ptc :symbol nil ";")])])))
+      (is (= ts [(tkc :symbol "}")]))))
+  (testing "Parses multiple statements up to a '}'"
+    (let [ts [(tkc :keyword "do") (tkc :identifier "func")
+              (tkc :symbol "(") (tkc :symbol ")")
+              (tkc :symbol ";")
+              (tkc :keyword "return") (tkc :symbol ";")
+              (tkc :symbol "}")]
+          [p ts] (parse-statements ts)]
+      (is (= p (ptc :statements
+                    [(ptc :doStatement
+                          [(ptc :keyword nil "do")
+                           (ptc :identifier nil "func")
+                           (ptc :symbol nil "(")
+                           (ptc :expressionList [])
+                           (ptc :symbol nil ")")
+                           (ptc :symbol nil ";")])
+                     (ptc :returnStatement
+                          [(ptc :keyword nil "return")
+                           (ptc :symbol nil ";")])])))
+      (is (= ts [(tkc :symbol "}")])))))
