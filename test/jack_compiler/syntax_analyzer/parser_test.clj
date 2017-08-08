@@ -372,6 +372,33 @@
                             #"unexpected end of stream"
                             (parse-expression-list ts))))))
 
+(deftest consume-subroutine-call-test
+  (testing "Consumes standalone function call"
+    (let [ts [(tkc :identifier "func") (tkc :symbol "(")
+              (tkc :identifier "x") (tkc :symbol ")")
+              (tkc :symbol ";")]
+          [p ts] (consume-subroutine-call ts)]
+      (is (= p [(ptc :identifier nil "func")
+                (ptc :symbol nil "(")
+                (ptc :expressionList
+                     [(ptc :expression
+                           [(ptc :term
+                                 [(ptc :identifier nil "x")])])])
+                (ptc :symbol nil ")")]))
+      (is (= ts [(tkc :symbol ";")]))))
+  (testing "Consumes class/instance bound method call"
+    (let [ts [(tkc :identifier "var") (tkc :symbol ".")
+              (tkc :identifier "func") (tkc :symbol "(")
+              (tkc :symbol ")") (tkc :symbol ";")]
+          [p ts] (consume-subroutine-call ts)]
+      (is (= p [(ptc :identifier nil "var")
+                (ptc :symbol nil ".")
+                (ptc :identifier nil "func")
+                (ptc :symbol nil "(")
+                (ptc :expressionList [])
+                (ptc :symbol nil ")")]))
+      (is (= ts [(tkc :symbol ";")])))))
+
 (deftest parse-statement-test
   (testing "let statement"
     (testing "Parses simple variable assignment"
