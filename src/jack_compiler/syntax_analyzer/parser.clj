@@ -123,14 +123,6 @@
   ([ts values]
    (consume-terminal ts :symbol values)))
 
-(defn consume-type
-  "Consumes next token from ts if it's type name keyword
-  or an identifier"
-  [ts]
-  (if (is-next-type? ts :keyword)
-    (consume-keyword ts ["int" "char" "boolean"])
-    (consume-identifier ts)))
-
 (defn consume-op
   "Consumes a binary operator node"
   [ts]
@@ -149,91 +141,6 @@
   (consume-keyword
     ts
     ["true" "false" "null" "this"]))
-
-(defn consume-comma-var
-  "Consumes a `',' varName` combination"
-  [ts]
-  (let [[comma ts] (consume-symbol ts [","])
-        [iden ts] (consume-identifier ts)]
-    [[comma iden] ts]))
-
-(defn consume-comma-var-seq
-  "Consume 0 or more pairs of comma followed by a var name
-  until a semicolon is found.
-  Returns a seq of the consumed tokens and seq of remaining
-  tokens."
-  [ts]
-  (consume-until
-    ts
-    #(is-next-value? % ";")
-    consume-comma-var))
-
-(defn consume-var-seq
-  "Consumes a sequence of var names separated by a comma
-  and ending in a semicolon"
-  [ts]
-  (let [[fst ts] (consume-identifier ts)
-        [others ts] (consume-comma-var-seq ts)
-        [sc ts] (consume-symbol ts [";"])]
-    [(nodes-vec fst others sc) ts]))
-
-(defn consume-type-var
-  "Consumes a `type varName` combination"
-  [ts]
-  (let [[typ ts] (consume-type ts)
-        [iden ts] (consume-identifier ts)]
-    [[typ iden] ts]))
-
-(defn consume-comma-type-var
-  "Consumes `',' type varName` combination"
-  [ts]
-  (let [[comma ts] (consume-symbol ts [","])
-        [typ ts] (consume-type ts)
-        [iden ts] (consume-identifier ts)]
-    [[comma typ iden] ts]))
-
-(defn consume-comma-type-var-seq
-  "Consumes a `(',' type varName)*` sequence for
-  for parameter list"
-  [ts]
-  (consume-until
-    ts
-    #(is-next-value? % ")")
-    consume-comma-type-var))
-
-(defn parse-class-var-dec
-  "Parses a classVarDec node"
-  [ts]
-  (let [[field ts] (consume-keyword ts ["field" "static"])
-        [typ ts] (consume-type ts)
-        [vars ts] (consume-var-seq ts)]
-    [(pt/parse-tree
-       :classVarDec
-       (nodes-vec field typ vars))
-     ts]))
-
-(defn parse-var-dec
-  "Parses a varDec node `'var' type varName (',' varName)*';'`"
-  [ts]
-  (let [[kw ts] (consume-keyword ts ["var"])
-        [typ ts] (consume-type ts)
-        [vars ts] (consume-var-seq ts)]
-    [(pt/parse-tree
-       :varDec
-       (nodes-vec kw typ vars))
-     ts]))
-
-(defn parse-parameter-list
-  "Parses a subroutine parameter list"
-  [ts]
-  (if (is-next-value? ts ")")
-    [(pt/parse-tree :parameterList) ts]
-    (let [[fst ts] (consume-type-var ts)
-          [others ts] (consume-comma-type-var-seq ts)]
-      [(pt/parse-tree
-         :parameterList
-         (nodes-vec fst others))
-       ts])))
 
 (declare parse-expression)
 (declare parse-expression-list)
@@ -486,21 +393,158 @@
   (let [[stms ts] (consume-statement-seq ts)]
     [(pt/parse-tree :statements stms) ts]))
 
+(defn consume-comma-var
+  "Consumes a `',' varName` combination"
+  [ts]
+  (let [[comma ts] (consume-symbol ts [","])
+        [iden ts] (consume-identifier ts)]
+    [[comma iden] ts]))
+
+(defn consume-comma-var-seq
+  "Consume 0 or more pairs of comma followed by a var name
+  until a semicolon is found.
+  Returns a seq of the consumed tokens and seq of remaining
+  tokens."
+  [ts]
+  (consume-until
+    ts
+    #(is-next-value? % ";")
+    consume-comma-var))
+
+(defn consume-var-seq
+  "Consumes a sequence of var names separated by a comma
+  and ending in a semicolon"
+  [ts]
+  (let [[fst ts] (consume-identifier ts)
+        [others ts] (consume-comma-var-seq ts)
+        [sc ts] (consume-symbol ts [";"])]
+    [(nodes-vec fst others sc) ts]))
+
+(defn consume-type
+  "Consumes next token from ts if it's type name keyword
+  or an identifier"
+  [ts]
+  (if (is-next-type? ts :keyword)
+    (consume-keyword ts ["int" "char" "boolean"])
+    (consume-identifier ts)))
+
+(defn consume-return-type
+  "Consumes next token from ts if it's a
+  subroutine routine return type"
+  [ts]
+  (if (is-next-value? ts "void")
+    (consume-keyword ts ["void"])
+    (consume-type ts)))
+
+(defn consume-type-var
+  "Consumes a `type varName` combination"
+  [ts]
+  (let [[typ ts] (consume-type ts)
+        [iden ts] (consume-identifier ts)]
+    [[typ iden] ts]))
+
+(defn consume-comma-type-var
+  "Consumes `',' type varName` combination"
+  [ts]
+  (let [[comma ts] (consume-symbol ts [","])
+        [typ ts] (consume-type ts)
+        [iden ts] (consume-identifier ts)]
+    [[comma typ iden] ts]))
+
+(defn consume-comma-type-var-seq
+  "Consumes a `(',' type varName)*` sequence for
+  for parameter list"
+  [ts]
+  (consume-until
+    ts
+    #(is-next-value? % ")")
+    consume-comma-type-var))
+
+(defn parse-class-var-dec
+  "Parses a classVarDec node"
+  [ts]
+  (let [[field ts] (consume-keyword ts ["field" "static"])
+        [typ ts] (consume-type ts)
+        [vars ts] (consume-var-seq ts)]
+    [(pt/parse-tree
+       :classVarDec
+       (nodes-vec field typ vars))
+     ts]))
+
+(defn parse-parameter-list
+  "Parses a subroutine parameter list"
+  [ts]
+  (if (is-next-value? ts ")")
+    [(pt/parse-tree :parameterList) ts]
+    (let [[fst ts] (consume-type-var ts)
+          [others ts] (consume-comma-type-var-seq ts)]
+      [(pt/parse-tree
+         :parameterList
+         (nodes-vec fst others))
+       ts])))
+
+(defn parse-var-dec
+  "Parses a varDec node `'var' type varName (',' varName)*';'`"
+  [ts]
+  (let [[kw ts] (consume-keyword ts ["var"])
+        [typ ts] (consume-type ts)
+        [vars ts] (consume-var-seq ts)]
+    [(pt/parse-tree
+       :varDec
+       (nodes-vec kw typ vars))
+     ts]))
+
+(defn consume-var-dec-seq
+  "Consumes a sequence of 0 or more varDec"
+  [ts]
+  (consume-until
+    ts
+    (complement #(is-next-value? % "var"))
+    parse-var-dec))
+
+(defn consume-subroutine-type
+  "Consumes keyword if it's constructor|function|method"
+  [ts]
+  (consume-keyword
+    ts
+    ["constructor" "function" "method"]))
+
+(defn parse-subroutine-body
+  "Parses `'{'varDec* statements'}'"
+  [ts]
+  (let [[op-br ts] (consume-symbol ts ["{"])
+        [vars ts] (consume-var-dec-seq ts)
+        [stms ts] (parse-statements)
+        [cl-br ts] (consume-symbol ts ["}"])]
+    [(pt/parse-tree
+       :subroutineBody
+       (nodes-vec op-br vars stms cl-br))
+     ts]))
+
 (defn parse-subroutine-dec
   [ts]
-  (prn "TODO parse subroutine-dec")
-  [])
+  (let [[sub-typ ts] (consume-subroutine-type ts)
+        [rtyp ts] (consume-return-type ts)
+        [id ts] (consume-identifier ts)
+        [op-br ts] (consume-symbol ts ["("])
+        [params ts] (parse-parameter-list ts)
+        [cl-br ts] (consume-symbol ts [")"])
+        [body ts] (parse-subroutine-body ts)]
+    [(pt/parse-tree
+       :subroutineDec
+       (nodes-vec sub-typ rtyp id op-br params cl-br body))
+     ts]))
 
 (defn parse-class
   "Parses a class node"
   [ts]
   (let [[cls ts] (consume-keyword ts ["class"])
         [id ts] (consume-identifier ts)
-        [open-br ts] (consume-symbol ts ["{"])
+        [op-br ts] (consume-symbol ts ["{"])
         [vars ts] (consume-until ts parse-class-var-dec)
         [subrs ts] (consume-until ts parse-subroutine-dec)
-        [close-br ts] (consume-symbol ts ["}"])]
+        [cl-br ts] (consume-symbol ts ["}"])]
     [(pt/parse-tree
        :class
-       (nodes-vec cls id open-br vars subrs close-br))
+       (nodes-vec cls id op-br vars subrs cl-br))
      ts]))
