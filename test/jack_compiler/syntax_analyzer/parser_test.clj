@@ -377,7 +377,7 @@
     (testing "Parses simple variable assignment"
       (let [ts [(tkc :keyword "let") (tkc :identifier "x")
                 (tkc :symbol "=") (tkc :identifier "y")
-                (tkc :symbol ";")]
+                (tkc :symbol ";") (tkc :keyword "do")]
             [p ts] (parse-statement ts)]
         (is (= p (ptc :letStatement
                       [(ptc :keyword nil "let")
@@ -386,12 +386,13 @@
                        (ptc :expression
                             [(ptc :term
                                   [(ptc :identifier nil "y")])])
-                       (ptc :symbol nil ";")])))))
+                       (ptc :symbol nil ";")])))
+        (is (= ts [(tkc :keyword "do")]))))
     (testing "Parses array index assignment"
       (let [ts [(tkc :keyword "let") (tkc :identifier "items")
                 (tkc :symbol "[") (tkc :identifier "i") (tkc :symbol "]")
                 (tkc :symbol "=") (tkc :identifier "y")
-                (tkc :symbol ";")]
+                (tkc :symbol ";") (tkc :keyword "do")]
             [p ts] (parse-statement ts)]
         (is (= p (ptc :letStatement
                       [(ptc :keyword nil "let")
@@ -405,7 +406,8 @@
                        (ptc :expression
                             [(ptc :term
                                   [(ptc :identifier nil "y")])])
-                       (ptc :symbol nil ";")]))))))
+                       (ptc :symbol nil ";")])))
+        (is (= ts [(tkc :keyword "do")])))))
   (testing "if statement"
     (testing "Parses if only statement"
       (let [ts [(tkc :keyword "if") (tkc :symbol "(")
@@ -479,7 +481,7 @@
                                    (ptc :symbol nil "=")
                                    (ptc :expression
                                         [(ptc :term
-                                              [(ptc :identifier nil "y")])])
+                                              [(ptc :identifier nil "z")])])
                                    (ptc :symbol nil ";")])])
                        (ptc :symbol nil "}")])))
         (is (= ts [(tkc :keyword "do")]))))))

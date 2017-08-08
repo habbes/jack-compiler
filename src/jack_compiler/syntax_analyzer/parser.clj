@@ -385,7 +385,7 @@
   (let [[op-br ts] (consume-symbol ts ["{"])
         [stms ts] (parse-statements ts)
         [cl-br ts] (consume-symbol ts ["}"])]
-    [(nodes-vec op-br stms cl-br)]))
+    [(nodes-vec op-br stms cl-br) ts]))
 
 (defn consume-else-block
   "Consumes `'else''{'statements'}'`"
