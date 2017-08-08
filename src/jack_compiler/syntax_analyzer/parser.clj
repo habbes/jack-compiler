@@ -235,6 +235,9 @@
          (nodes-vec fst others))
        ts])))
 
+(declare parse-expression)
+(declare parse-expression-list)
+
 (defn consume-function-call
   "Consumes `subroutineName'('expressionList')'"
   [ts]
@@ -358,7 +361,7 @@
         [iden ts] (consume-identifier ts)
         [index ts] (consume-when-array-index ts)
         [assgn ts] (consume-symbol ts ["="])
-        [ex ts] (consume-expression ts)
+        [ex ts] (parse-expression ts)
         [sc ts] (consume-symbol ts [";"])]
     [(pt/parse-tree
        :letStatement
