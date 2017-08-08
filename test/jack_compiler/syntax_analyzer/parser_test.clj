@@ -405,4 +405,81 @@
                        (ptc :expression
                             [(ptc :term
                                   [(ptc :identifier nil "y")])])
-                       (ptc :symbol nil ";")])))))))
+                       (ptc :symbol nil ";")]))))))
+  (testing "if statement"
+    (testing "Parses if only statement"
+      (let [ts [(tkc :keyword "if") (tkc :symbol "(")
+                (tkc :identifier "x") (tkc :symbol ")")
+                (tkc :symbol "{")
+                (tkc :keyword "let") (tkc :identifier "x")
+                (tkc :symbol "=") (tkc :identifier "y")
+                (tkc :symbol ";")
+                (tkc :symbol "}")
+                (tkc :keyword "do")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :ifStatement
+                      [(ptc :keyword nil "if")
+                       (ptc :symbol nil "(")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "x")])])
+                       (ptc :symbol nil ")")
+                       (ptc :symbol nil "{")
+                       (ptc :statements
+                            [(ptc :letStatement
+                                  [(ptc :keyword nil "let")
+                                   (ptc :identifier nil "x")
+                                   (ptc :symbol nil "=")
+                                   (ptc :expression
+                                        [(ptc :term
+                                              [(ptc :identifier nil "y")])])
+                                   (ptc :symbol nil ";")])])
+                       (ptc :symbol nil "}")])))
+        (is (= ts [(tkc :keyword "do")]))))
+    (testing "Parses if-else statement"
+      (let [ts [(tkc :keyword "if") (tkc :symbol "(")
+                (tkc :identifier "x") (tkc :symbol ")")
+                (tkc :symbol "{")
+                (tkc :keyword "let") (tkc :identifier "x")
+                (tkc :symbol "=") (tkc :identifier "y")
+                (tkc :symbol ";")
+                (tkc :symbol "}")
+                (tkc :keyword "else")
+                (tkc :symbol "{")
+                (tkc :keyword "let") (tkc :identifier "x")
+                (tkc :symbol "=") (tkc :identifier "z")
+                (tkc :symbol ";")
+                (tkc :symbol "}")
+                (tkc :keyword "do")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :ifStatement
+                      [(ptc :keyword nil "if")
+                       (ptc :symbol nil "(")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "x")])])
+                       (ptc :symbol nil ")")
+                       (ptc :symbol nil "{")
+                       (ptc :statements
+                            [(ptc :letStatement
+                                  [(ptc :keyword nil "let")
+                                   (ptc :identifier nil "x")
+                                   (ptc :symbol nil "=")
+                                   (ptc :expression
+                                        [(ptc :term
+                                              [(ptc :identifier nil "y")])])
+                                   (ptc :symbol nil ";")])])
+                       (ptc :symbol nil "}")
+                       (ptc :keyword nil "else")
+                       (ptc :symbol nil "{")
+                       (ptc :statements
+                            [(ptc :letStatement
+                                  [(ptc :keyword nil "let")
+                                   (ptc :identifier nil "x")
+                                   (ptc :symbol nil "=")
+                                   (ptc :expression
+                                        [(ptc :term
+                                              [(ptc :identifier nil "y")])])
+                                   (ptc :symbol nil ";")])])
+                       (ptc :symbol nil "}")])))
+        (is (= ts [(tkc :keyword "do")]))))))
