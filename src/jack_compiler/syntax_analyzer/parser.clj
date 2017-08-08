@@ -460,17 +460,6 @@
     #(is-next-value? % ")")
     consume-comma-type-var))
 
-(defn parse-class-var-dec
-  "Parses a classVarDec node"
-  [ts]
-  (let [[field ts] (consume-keyword ts ["field" "static"])
-        [typ ts] (consume-type ts)
-        [vars ts] (consume-var-seq ts)]
-    [(pt/parse-tree
-       :classVarDec
-       (nodes-vec field typ vars))
-     ts]))
-
 (defn parse-parameter-list
   "Parses a subroutine parameter list"
   [ts]
@@ -522,6 +511,7 @@
      ts]))
 
 (defn parse-subroutine-dec
+  "Parses a subroutine declaration"
   [ts]
   (let [[sub-typ ts] (consume-subroutine-type ts)
         [rtyp ts] (consume-return-type ts)
@@ -535,14 +525,42 @@
        (nodes-vec sub-typ rtyp id op-br params cl-br body))
      ts]))
 
+(defn consume-subroutine-dec-seq
+  "Parses 0 or more subroutine decs up to a '}'"
+  [ts]
+  (consume-until
+    ts
+    #(is-next-value? % "}")
+    parse-subroutine-dec))
+
+(defn parse-class-var-dec
+  "Parses a classVarDec node"
+  [ts]
+  (let [[field ts] (consume-keyword ts ["field" "static"])
+        [typ ts] (consume-type ts)
+        [vars ts] (consume-var-seq ts)]
+    [(pt/parse-tree
+       :classVarDec
+       (nodes-vec field typ vars))
+     ts]))
+
+(defn consume-class-var-dec-seq
+  "Consumes 0 or more `classVarDec`s"
+  [ts]
+  (consume-until
+    ts
+    (complement
+      #(is-next-value? % ["field" "static"]))
+    parse-class-var-dec))
+
 (defn parse-class
   "Parses a class node"
   [ts]
   (let [[cls ts] (consume-keyword ts ["class"])
         [id ts] (consume-identifier ts)
         [op-br ts] (consume-symbol ts ["{"])
-        [vars ts] (consume-until ts parse-class-var-dec)
-        [subrs ts] (consume-until ts parse-subroutine-dec)
+        [vars ts] (consume-class-var-dec-seq ts)
+        [subrs ts] (consume-subroutine-dec-seq ts)
         [cl-br ts] (consume-symbol ts ["}"])]
     [(pt/parse-tree
        :class
