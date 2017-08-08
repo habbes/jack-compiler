@@ -430,10 +430,11 @@
   "Parses `'do' subroutineCall`"
   [ts]
   (let [[kw ts] (consume-keyword ts ["do"])
-        [subr ts] (consume-subroutine-call ts)]
+        [subr ts] (consume-subroutine-call ts)
+        [sc ts] (consume-symbol ts [";"])]
     [(pt/parse-tree
        :doStatement
-       (nodes-vec kw subr))
+       (nodes-vec kw subr sc))
      ts]))
 
 (defn consume-when-expression

@@ -542,6 +542,40 @@
                                    (ptc :symbol nil ";")])])
                        (ptc :symbol nil "}")])))
         (is (= ts [(tkc :keyword "let")])))))
+  (testing "do statement"
+    (testing "Parses unbound function call"
+      (let [ts [(tkc :keyword "do") (tkc :identifier "func")
+                (tkc :symbol "(") (tkc :symbol ")")
+                (tkc :symbol ";") (tkc :symbol "}")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :doStatement
+                      [(ptc :keyword nil "do")
+                       (ptc :identifier nil "func")
+                       (ptc :symbol nil "(")
+                       (ptc :expressionList [])
+                       (ptc :symbol nil ")")
+                       (ptc :symbol nil ";")])))
+        (is (= ts [(tkc :symbol "}")]))))
+    (testing "Parses bound method call"
+      (let [ts [(tkc :keyword "do") (tkc :identifier "var")
+                (tkc :symbol ".") (tkc :identifier "func")
+                (tkc :symbol "(") (tkc :identifier "x")
+                (tkc :symbol ")") (tkc :symbol ";")
+                (tkc :symbol "}")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :doStatement
+                      [(ptc :keyword nil "do")
+                       (ptc :identifier nil "var")
+                       (ptc :symbol nil ".")
+                       (ptc :identifier nil "func")
+                       (ptc :symbol nil "(")
+                       (ptc :expressionList
+                            [(ptc :expression
+                                  [(ptc :term
+                                        [(ptc :identifier nil "x")])])])
+                       (ptc :symbol nil ")")
+                       (ptc :symbol nil ";")])))
+        (is (= ts [(tkc :symbol "}")])))))
   (testing "return statement"
     (testing "Parses return without expression"
       (let [ts [(tkc :keyword "return") (tkc :symbol ";")
