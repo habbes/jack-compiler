@@ -484,4 +484,34 @@
                                               [(ptc :identifier nil "z")])])
                                    (ptc :symbol nil ";")])])
                        (ptc :symbol nil "}")])))
-        (is (= ts [(tkc :keyword "do")]))))))
+        (is (= ts [(tkc :keyword "do")])))))
+  (testing "while statement"
+    (testing "Parses while statement"
+      (let [ts [(tkc :keyword "while") (tkc :symbol "(")
+                (tkc :identifier "x") (tkc :symbol ")")
+                (tkc :symbol "{")
+                (tkc :keyword "let") (tkc :identifier "x")
+                (tkc :symbol "=") (tkc :identifier "y")
+                (tkc :symbol ";")
+                (tkc :symbol "}")
+                (tkc :keyword "let")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :whileStatement
+                      [(ptc :keyword nil "while")
+                       (ptc :symbol nil "(")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "x")])])
+                       (ptc :symbol nil ")")
+                       (ptc :symbol nil "{")
+                       (ptc :statements
+                            [(ptc :letStatement
+                                  [(ptc :keyword nil "let")
+                                   (ptc :identifier nil "x")
+                                   (ptc :symbol nil "=")
+                                   (ptc :expression
+                                        [(ptc :term
+                                              [(ptc :identifier nil "y")])])
+                                   (ptc :symbol nil ";")])])
+                       (ptc :symbol nil "}")])))
+        (is (= ts [(tkc :keyword "let")]))))))
