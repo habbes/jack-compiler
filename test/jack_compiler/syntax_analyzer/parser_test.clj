@@ -371,3 +371,38 @@
       (is (thrown-with-msg? Exception
                             #"unexpected end of stream"
                             (parse-expression-list ts))))))
+
+(deftest parse-statement-test
+  (testing "let statement"
+    (testing "Parses simple variable assignment"
+      (let [ts [(tkc :keyword "let") (tkc :identifier "x")
+                (tkc :symbol "=") (tkc :identifier "y")
+                (tkc :symbol ";")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :letStatement
+                      [(ptc :keyword nil "let")
+                       (ptc :identifier nil "x")
+                       (ptc :symbol nil "=")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "y")])])
+                       (ptc :symbol nil ";")])))))
+    (testing "Parses array index assignment"
+      (let [ts [(tkc :keyword "let") (tkc :identifier "items")
+                (tkc :symbol "[") (tkc :identifier "i") (tkc :symbol "]")
+                (tkc :symbol "=") (tkc :identifier "y")
+                (tkc :symbol ";")]
+            [p ts] (parse-statement ts)]
+        (is (= p (ptc :letStatement
+                      [(ptc :keyword nil "let")
+                       (ptc :identifier nil "items")
+                       (ptc :symbol nil "[")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "i")])])
+                       (ptc :symbol nil "]")
+                       (ptc :symbol nil "=")
+                       (ptc :expression
+                            [(ptc :term
+                                  [(ptc :identifier nil "y")])])
+                       (ptc :symbol nil ";")])))))))
