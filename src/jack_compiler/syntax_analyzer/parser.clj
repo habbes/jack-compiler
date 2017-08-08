@@ -318,7 +318,7 @@
   by comma"
   [ts]
   (let [[fst ts] (parse-expression ts)
-        [others ts] (parse-expression-list ts)]
+        [others ts] (consume-comma-expression-seq ts)]
     [(nodes-vec fst others) ts]))
 
 (defn consume-when-expression-seq
@@ -334,7 +334,7 @@
   "Parses `(expression (','expression)*)?`
   when the next token is not a ')'"
   [ts]
-  (let [[exprs ts] (consume-when-expression-seq)]
+  (let [[exprs ts] (consume-when-expression-seq ts)]
     [(pt/parse-tree :expressionList exprs) ts]))
 
 (defn consume-array-index

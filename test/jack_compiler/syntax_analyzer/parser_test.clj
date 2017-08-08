@@ -318,3 +318,56 @@
                    (ptc :symbol nil "*")
                    (ptc :term [(ptc :identifier nil "z")])])))
       (is (= ts [(tkc :symbol ";")])))))
+
+(deftest parse-expression-list-test
+  (testing "Parses empty expression list if a closing bracket is reached first"
+    (let [ts [(tkc :symbol ")")]
+          [p ts] (parse-expression-list ts)]
+      (is (= p (ptc :expressionList [])))
+      (is (= ts [(tkc :symbol ")")]))))
+  (testing "Parses single expression up to a closing bracket"
+    (let [ts [(tkc :identifier "x") (tkc :symbol ")")]
+          [p ts] (parse-expression-list ts)]
+      (is (= p (ptc :expressionList
+                    [(ptc :expression
+                          [(ptc :term
+                                [(ptc :identifier nil "x")])])])))
+      (is (= ts [(tkc :symbol ")")]))))
+  (testing "Parses comma-delimited expressions up to a closing bracket"
+    (let [ts [(tkc :identifier "x") (tkc :symbol ",")
+              (tkc :identifier "y") (tkc :symbol ",")
+              (tkc :identifier "z") (tkc :symbol ")")]
+          [p ts] (parse-expression-list ts)]
+      (is (= p (ptc :expressionList
+                    [(ptc :expression
+                          [(ptc :term
+                                [(ptc :identifier nil "x")])])
+                     (ptc :symbol nil ",")
+                     (ptc :expression
+                          [(ptc :term
+                                [(ptc :identifier nil "y")])])
+                     (ptc :symbol nil ",")
+                     (ptc :expression
+                          [(ptc :term
+                                [(ptc :identifier nil "z")])])])))
+      (is (= ts [(tkc :symbol ")")]))))
+  (testing "Throws error on invalid delimiter"
+    (let [ts [(tkc :identifier "x") (tkc :symbol ";")]]
+      (is (thrown-with-msg? Exception
+                            #", expected but found ;"
+                            (parse-expression-list ts)))))
+  (testing "Throws error when delimiter skipped"
+    (let [ts [(tkc :identifier "x") (tkc :identifier "y")]]
+      (is (thrown-with-msg? Exception
+                            #"symbol expected but found identifier y"
+                            (parse-expression-list ts)))))
+  (testing "Throws error when next token is not identifier"
+    (let [ts [(tkc :keyword "let") (tkc :identifier "x")]]
+      (is (thrown-with-msg? Exception
+                            #"identifier expected but found keyword let"
+                            (parse-expression-list ts)))))
+  (testing "Throws error when stream ends before closing bracket"
+    (let [ts [(tkc :identifier "x")]]
+      (is (thrown-with-msg? Exception
+                            #"unexpected end of stream"
+                            (parse-expression-list ts))))))
