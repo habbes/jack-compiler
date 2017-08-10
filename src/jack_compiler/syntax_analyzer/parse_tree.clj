@@ -18,3 +18,14 @@
   [pt]
   (nil? (.children pt)))
 
+(defn simple-print
+  "Prints a simple linear representation of the parse tree.
+  Useful for debugging"
+  [pt]
+  (if (terminal? pt)
+    (print (str "'" (:value pt) "' "))
+    (do
+      (print (str (:name pt) "("))
+      (doseq [c (:children pt)]
+        (simple-print c))
+      (print ") "))))
