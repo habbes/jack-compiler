@@ -16,4 +16,5 @@
 (defn terminal?
   "Checks whether pt is a terminal node"
   [pt]
-  (empty? (.children pt)))
+  (nil? (.children pt)))
+
