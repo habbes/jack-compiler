@@ -632,3 +632,74 @@
                           [(ptc :keyword nil "return")
                            (ptc :symbol nil ";")])])))
       (is (= ts [(tkc :symbol "}")])))))
+
+(deftest parse-subroutine-body-test
+  (testing "Parses subroutine `'{'varDec* statements'}'"
+    (let [ts [(tkc :symbol "{")
+              (tkc :keyword "var") (tkc :keyword "int")
+              (tkc :identifier "x") (tkc :symbol ",")
+              (tkc :identifier "y") (tkc :symbol ";")
+              (tkc :keyword "var") (tkc :identifier "Foo")
+              (tkc :identifier "bar") (tkc :symbol ";")
+              (tkc :keyword "do") (tkc :identifier "baz")
+              (tkc :symbol "(") (tkc :identifier "x")
+              (tkc :symbol ")") (tkc :symbol ";")
+              (tkc :keyword "return") (tkc :symbol ";")
+              (tkc :symbol "}") (tkc :keyword "function")]
+          [p ts] (parse-subroutine-body ts)]
+      (is (= p (ptc :subroutineBody
+                    [(ptc :symbol nil "{")
+                     (ptc :varDec
+                          [(ptc :keyword nil "var")
+                           (ptc :keyword nil "int")
+                           (ptc :identifier nil "x")
+                           (ptc :symbol nil ",")
+                           (ptc :identifier nil "y")
+                           (ptc :symbol nil ";")])
+                     (ptc :varDec
+                          [(ptc :keyword nil "var")
+                           (ptc :identifier nil "Foo")
+                           (ptc :identifier nil "bar")
+                           (ptc :symbol nil ";")])
+                     (ptc :statements
+                          [(ptc :doStatement
+                                [(ptc :keyword nil "do")
+                                 (ptc :identifier nil "baz")
+                                 (ptc :symbol nil "(")
+                                 (ptc :expressionList
+                                      [(ptc :expression
+                                            [(ptc :term
+                                                  [(ptc :identifier nil "x")])])])
+                                 (ptc :symbol nil ")")
+                                 (ptc :symbol nil ";")])
+                           (ptc :returnStatement
+                                [(ptc :keyword nil "return")
+                                 (ptc :symbol nil ";")])])
+                     (ptc :symbol nil "}")])))
+      (is (= ts [(tkc :keyword "function")]))))
+  (testing "Parses body without vars"
+    (let [ts [(tkc :symbol "{")
+              (tkc :keyword "return") (tkc :identifier "x")
+              (tkc :symbol ";")
+              (tkc :symbol "}") (tkc :symbol "}")]
+          [p ts] (parse-subroutine-body ts)]
+      (is (= p (ptc :subroutineBody
+                    [(ptc :symbol nil "{")
+                     (ptc :statements
+                          [(ptc :returnStatement
+                                [(ptc :keyword nil "return")
+                                 (ptc :expression
+                                      [(ptc :term
+                                            [(ptc :identifier nil "x")])])
+                                 (ptc :symbol nil ";")])])
+                     (ptc :symbol nil "}")])))
+      (is (= ts [(tkc :symbol "}")]))))
+  (testing "Parses empty body"
+    (let [ts [(tkc :symbol "{") (tkc :symbol "}")
+              (tkc :symbol "}")]
+          [p ts] (parse-subroutine-body ts)]
+      (is (= p (ptc :subroutineBody
+                    [(ptc :symbol nil "{")
+                     (ptc :statements [])
+                     (ptc :symbol nil "}")])))
+      (is (= ts [(tkc :symbol "}")])))))

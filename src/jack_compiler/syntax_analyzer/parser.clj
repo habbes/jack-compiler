@@ -503,7 +503,7 @@
   [ts]
   (let [[op-br ts] (consume-symbol ts ["{"])
         [vars ts] (consume-var-dec-seq ts)
-        [stms ts] (parse-statements)
+        [stms ts] (parse-statements ts)
         [cl-br ts] (consume-symbol ts ["}"])]
     [(pt/parse-tree
        :subroutineBody
