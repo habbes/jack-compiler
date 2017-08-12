@@ -761,3 +761,71 @@
       (is (thrown-with-msg? Exception
                             #"constructor or function or method expected but found subroutine"
                             (parse-subroutine-dec ts))))))
+
+(deftest parse-class-test
+  (testing "Parses `'class' className'{' classVarDec* subroutineDec* '}'"
+    (let [ts [(tkc :keyword "class") (tkc :identifier "Foo")
+              (tkc :symbol "{")
+              (tkc :keyword "static") (tkc :keyword "int")
+              (tkc :identifier "x") (tkc :symbol ";")
+              (tkc :keyword "field") (tkc :keyword "boolean")
+              (tkc :identifier "check") (tkc :symbol ",")
+              (tkc :identifier "empty") (tkc :symbol ";")
+              (tkc :keyword "constructor") (tkc :identifier "Foo")
+              (tkc :identifier "new")
+              (tkc :symbol "(") (tkc :symbol ")")
+              (tkc :symbol "{") (tkc :keyword "return")
+              (tkc :symbol ";") (tkc :symbol "}")
+              (tkc :keyword "method") (tkc :keyword "void")
+              (tkc :identifier "func")
+              (tkc :symbol "(") (tkc :symbol ")")
+              (tkc :symbol "{") (tkc :keyword "return")
+              (tkc :symbol ";") (tkc :symbol "}")
+              (tkc :symbol "}")]
+          [p ts] (parse-class ts)]
+      (is (= p (ptc :class
+                    [(ptc :keyword nil "class")
+                     (ptc :identifier nil "Foo")
+                     (ptc :symbol nil "{")
+                     (ptc :classVarDec
+                          [(ptc :keyword nil "static")
+                           (ptc :keyword nil "int")
+                           (ptc :identifier nil "x")
+                           (ptc :symbol nil ";")])
+                     (ptc :classVarDec
+                          [(ptc :keyword nil "field")
+                           (ptc :keyword nil "boolean")
+                           (ptc :identifier nil "check")
+                           (ptc :symbol nil ",")
+                           (ptc :identifier nil "empty")
+                           (ptc :symbol nil ";")])
+                     (ptc :subroutineDec
+                          [(ptc :keyword nil "constructor")
+                           (ptc :identifier nil "Foo")
+                           (ptc :identifier nil "new")
+                           (ptc :symbol nil "(")
+                           (ptc :parameterList [])
+                           (ptc :symbol nil ")")
+                           (ptc :subroutineBody
+                                [(ptc :symbol nil "{")
+                                 (ptc :statements
+                                      [(ptc :returnStatement
+                                            [(ptc :keyword nil "return")
+                                             (ptc :symbol nil ";")])])
+                                 (ptc :symbol nil "}")])])
+                     (ptc :subroutineDec
+                          [(ptc :keyword nil "method")
+                           (ptc :keyword nil "void")
+                           (ptc :identifier nil "func")
+                           (ptc :symbol nil "(")
+                           (ptc :parameterList [])
+                           (ptc :symbol nil ")")
+                           (ptc :subroutineBody
+                                [(ptc :symbol nil "{")
+                                 (ptc :statements
+                                      [(ptc :returnStatement
+                                            [(ptc :keyword nil "return")
+                                             (ptc :symbol nil ";")])])
+                                 (ptc :symbol nil "}")])])
+                     (ptc :symbol nil "}")])))
+      (is (= ts nil)))))
