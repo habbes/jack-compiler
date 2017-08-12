@@ -705,30 +705,59 @@
       (is (= ts [(tkc :symbol "}")])))))
 
 (deftest parse-subroutine-dec-test
-  (testing "Parses constructor declaration"
-    (let [ts [(tkc :keyword "constructor") (tkc :identifier "Foo")
-              (tkc :identifier "new") (tkc :symbol "(")
-              (tkc :keyword "int") (tkc :identifier "x")
+  (testing "Parses constructor, function and method declaration"
+    (doseq [subtype ["constructor" "function" "method"]]
+      (let [ts [(tkc :keyword subtype) (tkc :identifier "Foo")
+                (tkc :identifier "new") (tkc :symbol "(")
+                (tkc :keyword "int") (tkc :identifier "x")
+                (tkc :symbol ")") (tkc :symbol "{")
+                (tkc :keyword "return") (tkc :identifier "x")
+                (tkc :symbol ";") (tkc :symbol "}")
+                (tkc :symbol "}")]
+            [p ts] (parse-subroutine-dec ts)]
+        (is (= p (ptc :subroutineDec
+                      [(ptc :keyword nil subtype)
+                       (ptc :identifier nil "Foo")
+                       (ptc :identifier nil "new")
+                       (ptc :symbol nil "(")
+                       (ptc :parameterList
+                            [(ptc :keyword nil "int")
+                             (ptc :identifier nil "x")])
+                       (ptc :symbol nil ")")
+                       (ptc :subroutineBody
+                            [(ptc :symbol nil "{")
+                             (ptc :statements
+                                  [(ptc :returnStatement
+                                        [(ptc :keyword nil "return")
+                                         (ptc :expression
+                                              [(ptc :term
+                                                    [(ptc :identifier nil "x")])])
+                                         (ptc :symbol nil ";")])])
+                             (ptc :symbol nil "}")])])))
+        (is (= ts [(tkc :symbol "}")])))))
+  (testing "Accepts void return type"
+    (let [ts [(tkc :keyword "method") (tkc :keyword "void")
+              (tkc :identifier "foo") (tkc :symbol "(")
               (tkc :symbol ")") (tkc :symbol "{")
-              (tkc :keyword "return") (tkc :identifier "x")
-              (tkc :symbol ";") (tkc :symbol "}")]
+              (tkc :keyword "return") (tkc :symbol ";")
+              (tkc :symbol "}") (tkc :symbol "}")]
           [p ts] (parse-subroutine-dec ts)]
       (is (= p (ptc :subroutineDec
-                    [(ptc :keyword nil "constructor")
-                     (ptc :identifier nil "Foo")
-                     (ptc :identifier nil "new")
-                     (ptc :symbol nil "(")
-                     (ptc :parameterList
-                          [(ptc :keyword nil "int")
-                           (ptc :identifier nil "x")])
-                     (ptc :symbol nil ")")
-                     (ptc :subroutineBody
-                          [(ptc :symbol nil "{")
-                           (ptc :statements
-                                [(ptc :returnStatement
-                                      [(ptc :keyword nil "return")
-                                       (ptc :expression
-                                            [(ptc :term
-                                                  [(ptc :identifier nil "x")])])
-                                       (ptc :symbol nil ";")])])
-                           (ptc :symbol nil "}")])]))))))
+                      [(ptc :keyword nil "method")
+                       (ptc :keyword nil "void")
+                       (ptc :identifier nil "foo")
+                       (ptc :symbol nil "(")
+                       (ptc :parameterList [])
+                       (ptc :symbol nil ")")
+                       (ptc :subroutineBody
+                            [(ptc :symbol nil "{")
+                             (ptc :statements
+                                  [(ptc :returnStatement
+                                        [(ptc :keyword nil "return")
+                                         (ptc :symbol nil ";")])])
+                             (ptc :symbol nil "}")])])))))
+  (testing "Throws exception when starts with wrong keyword"
+    (let [ts [(tkc :keyword "subroutine") (tkc :keyword "void")]]
+      (is (thrown-with-msg? Exception
+                            #"constructor or function or method expected but found subroutine"
+                            (parse-subroutine-dec ts))))))
