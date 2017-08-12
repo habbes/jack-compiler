@@ -554,7 +554,8 @@
     parse-class-var-dec))
 
 (defn parse-class
-  "Parses a class node"
+  "Parses a class node
+  `'class' className'{'classVarDec* subroutineDec*'}'`"
   [ts]
   (let [[cls ts] (consume-keyword ts ["class"])
         [id ts] (consume-identifier ts)
@@ -566,3 +567,9 @@
        :class
        (nodes-vec cls id op-br vars subrs cl-br))
      ts]))
+
+(defn parse
+  "Parses a seq of tokens ts into a ParseTree
+  representing a Jack class"
+  [ts]
+  (nth (parse-class ts) 0))
