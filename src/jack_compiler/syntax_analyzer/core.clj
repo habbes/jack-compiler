@@ -1,6 +1,7 @@
 (ns jack-compiler.syntax-analyzer.core
   (:require [jack-compiler.file :as file]
             [jack-compiler.syntax-analyzer.lexer :as lx]
+            [jack-compiler.syntax-analyzer.parser :as psr]
             [jack-compiler.syntax-analyzer.lexed-source]
             [clojure.java.io :as io])
   (:import [jack_compiler.syntax_analyzer.lexed_source LexedSource]))
@@ -39,3 +40,12 @@
   [h dir]
   (let [lss (lex-dir dir)]
     (handle-lexed-sources h lss)))
+
+(defprotocol ParsedSourceHandler
+  (handle-parsed-source [h ps] "Handles a ParsedSource instance"))
+
+(defn handle-parsed-sources
+  "Handles a seq of parsed sources using the specified handler"
+  [h pss]
+  (doseq [ps pss]
+    (handle-parsed-source h ps)))
