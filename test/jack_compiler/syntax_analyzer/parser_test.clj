@@ -703,3 +703,32 @@
                      (ptc :statements [])
                      (ptc :symbol nil "}")])))
       (is (= ts [(tkc :symbol "}")])))))
+
+(deftest parse-subroutine-dec-test
+  (testing "Parses constructor declaration"
+    (let [ts [(tkc :keyword "constructor") (tkc :identifier "Foo")
+              (tkc :identifier "new") (tkc :symbol "(")
+              (tkc :keyword "int") (tkc :identifier "x")
+              (tkc :symbol ")") (tkc :symbol "{")
+              (tkc :keyword "return") (tkc :identifier "x")
+              (tkc :symbol ";") (tkc :symbol "}")]
+          [p ts] (parse-subroutine-dec ts)]
+      (is (= p (ptc :subroutineDec
+                    [(ptc :keyword nil "constructor")
+                     (ptc :identifier nil "Foo")
+                     (ptc :identifier nil "new")
+                     (ptc :symbol nil "(")
+                     (ptc :parameterList
+                          [(ptc :keyword nil "int")
+                           (ptc :identifier nil "x")])
+                     (ptc :symbol nil ")")
+                     (ptc :subroutineBody
+                          [(ptc :symbol nil "{")
+                           (ptc :statements
+                                [(ptc :returnStatement
+                                      [(ptc :keyword nil "return")
+                                       (ptc :expression
+                                            [(ptc :term
+                                                  [(ptc :identifier nil "x")])])
+                                       (ptc :symbol nil ";")])])
+                           (ptc :symbol nil "}")])]))))))
