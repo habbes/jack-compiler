@@ -278,7 +278,6 @@
                       nil)))
         (is (= ts [(tkc :symbol ")")]))))))
 
-
 (deftest parse-term-test
   (testing "Parses varName"
     (let [ts [(tkc :identifier "x") (tkc :symbol ",")]
