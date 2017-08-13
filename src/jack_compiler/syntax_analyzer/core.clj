@@ -4,7 +4,8 @@
             [jack-compiler.syntax-analyzer.parser :as psr]
             [jack-compiler.syntax-analyzer.lexed-source]
             [clojure.java.io :as io])
-  (:import [jack_compiler.syntax_analyzer.lexed_source LexedSource]))
+  (:import [jack_compiler.syntax_analyzer.lexed_source LexedSource]
+           [jack_compiler.syntax_analyzer.parsed_source ParsedSource]))
 
 (defn lex-source
   "Lexes the specified file and returned a
@@ -26,7 +27,9 @@
   (write-tokens [tw ts w] "write tokens from the seq ts to the writer w"))
 
 (defprotocol LexedSourceHandler
-  (handle-lexed-source [h ls] "Handles a LexedSource instance"))
+  (handle-lexed-source
+    [h ls]
+    "Handles a LexedSource instance, presumably with side-effects"))
 
 (defn handle-lexed-sources
   "Handles a seq of lexed sources using the specified handler"
@@ -41,11 +44,46 @@
   (let [lss (lex-dir dir)]
     (handle-lexed-sources h lss)))
 
-(defprotocol ParsedSourceHandler
-  (handle-parsed-source [h ps] "Handles a ParsedSource instance"))
+(defprotocol LexedSourceTransform
+  (transform-lexed-source
+    [t ls]
+    "Transforms a LexedSource instance into something else"))
 
-(defn handle-parsed-sources
-  "Handles a seq of parsed sources using the specified handler"
-  [h pss]
-  (doseq [ps pss]
-    (handle-parsed-source h ps)))
+(def map-lexed-sources
+  "Maps each lexed source in lss to a transformed output
+  based on the transform t"
+  [t lss]
+  (map (partial transform-lexed-source t) lss))
+
+(def lex-and-transform-dir
+  "Lexes all jack files in the specified dir and
+  transforms them using the specified transform,
+  mapping each source to a transformed output"
+  [t dir]
+  (let [lss (lex-dir dir)]
+    (map-lexed-sources t lss)))
+
+(deftype Parser []
+  LexedSourceTransform
+  (transform-lexed-source
+    [_ {:keys [path tokens]}]
+    (let [tree (psr/parse tokens)]
+      (ParsedSource. path tree))))
+
+(defn parser
+  "Creates an instance of Parser"
+  []
+  (Parser.))
+
+(def parse-dir
+  "Parses all jack files in the specified dir
+  and returns a list of parsed sources"
+  [dir]
+  (let [p (parser)]
+    (lex-and-transform-dir p dir)))
+
+(defprotocol ParsedSourceHandler
+  (handle-parsed-source
+    [h ps]
+    "Handles a ParsedSource instance"))
+

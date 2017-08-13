@@ -1,9 +1,7 @@
 (ns jack-compiler.syntax-analyzer.parser
   (:require [jack-compiler.syntax-analyzer.token :as tk]
             [jack-compiler.syntax-analyzer.parse-tree :as pt]
-            [jack-compiler.syntax-analyzer.core :refer [LexedSourceHandler]]
-            [clojure.string :as s])
-  (:import [jack_compiler.syntax_analyzer.parsed_source ParsedSource]))
+            [clojure.string :as s]))
 
 (defn throw-parser-error
   "Throws exception with specifed message"
@@ -575,15 +573,3 @@
   representing a Jack class"
   [ts]
   (nth (parse-class ts) 0))
-
-(deftype Parser []
-  LexedSourceHandler
-  (handle-lexed-source
-    [_ {:keys [path tokens]}]
-    (let [tree (parse tokens)]
-      (ParsedSource. path tree))))
-
-(defn parser
-  "Creates an instance of Parser"
-  []
-  (Parser.))
