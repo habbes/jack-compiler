@@ -82,6 +82,11 @@
   (let [p (parser)]
     (lex-and-transform-dir p dir)))
 
+(defprotocol ParseTreeWriter
+  (write-tree
+    [tw t w]
+    "Writes the parse tree t to the writer w"))
+
 (defprotocol ParsedSourceHandler
   (handle-parsed-source
     [h ps]
