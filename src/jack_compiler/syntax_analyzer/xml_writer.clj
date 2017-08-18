@@ -66,6 +66,8 @@
     (convert-symbol v)
     v))
 
+(declare tree-to-xml)
+
 (defn tree-seq-to-xml
   "Converts a seq of parse trees to xml"
   [ts level]
@@ -82,7 +84,7 @@
            (str " " (tree-to-xml-value) " ")
            (str "\n" (indent level)
                 (tree-seq-to-xml ch (inc level))
-                "\n" (indent level))
+                "\n" (indent level)))
          (close-tag n))))
 
 (defn write-tree-to-file

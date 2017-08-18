@@ -3,6 +3,7 @@
             [jack-compiler.syntax-analyzer.lexer :as lx]
             [jack-compiler.syntax-analyzer.parser :as psr]
             [jack-compiler.syntax-analyzer.lexed-source]
+            [jack-compiler.syntax-analyzer.parsed-source]
             [clojure.java.io :as io])
   (:import [jack_compiler.syntax_analyzer.lexed_source LexedSource]
            [jack_compiler.syntax_analyzer.parsed_source ParsedSource]))
@@ -49,13 +50,13 @@
     [t ls]
     "Transforms a LexedSource instance into something else"))
 
-(def map-lexed-sources
+(defn map-lexed-sources
   "Maps each lexed source in lss to a transformed output
   based on the transform t"
   [t lss]
   (map (partial transform-lexed-source t) lss))
 
-(def lex-and-transform-dir
+(defn lex-and-transform-dir
   "Lexes all jack files in the specified dir and
   transforms them using the specified transform,
   mapping each source to a transformed output"
@@ -75,7 +76,7 @@
   []
   (Parser.))
 
-(def parse-dir
+(defn parse-dir
   "Parses all jack files in the specified dir
   and returns a list of parsed sources"
   [dir]
