@@ -4,6 +4,7 @@
             [jack-compiler.syntax-analyzer.lexer :as lx]
             [jack-compiler.syntax-analyzer.core :as sa]
             [jack-compiler.syntax-analyzer.lexed-source :refer [->LexedSource]]
+            [jack-compiler.syntax-analyzer.parse-tree :refer [parse-tree]]
             [clojure.string :as s]
             [clojure.java.io :as io]
             [me.raynes.fs :as fs]))
@@ -29,6 +30,56 @@
   <symbol> ; </symbol>
   <symbol> } </symbol>
 </tokens>")
+
+(def ptc parse-tree)
+
+(def exprless-class
+  (ptc
+    :class
+    [(ptc :keyword nil "class")
+     (ptc :identifier nil "Foo")
+     (ptc :symbol nil "{")
+     (ptc :classVarDec
+          [(ptc :keyword nil "static")
+           (ptc :keyword nil "int")
+           (ptc :identifier nil "x")
+           (ptc :symbol nil ";")])
+     (ptc :classVarDec
+          [(ptc :keyword nil "field")
+           (ptc :keyword nil "boolean")
+           (ptc :identifier nil "check")
+           (ptc :symbol nil ",")
+           (ptc :identifier nil "empty")
+           (ptc :symbol nil ";")])
+     (ptc :subroutineDec
+          [(ptc :keyword nil "constructor")
+           (ptc :identifier nil "Foo")
+           (ptc :identifier nil "new")
+           (ptc :symbol nil "(")
+           (ptc :parameterList [])
+           (ptc :symbol nil ")")
+           (ptc :subroutineBody
+                [(ptc :symbol nil "{")
+                 (ptc :statements
+                      [(ptc :returnStatement
+                            [(ptc :keyword nil "return")
+                             (ptc :symbol nil ";")])])
+                 (ptc :symbol nil "}")])])
+     (ptc :subroutineDec
+          [(ptc :keyword nil "method")
+           (ptc :keyword nil "void")
+           (ptc :identifier nil "func")
+           (ptc :symbol nil "(")
+           (ptc :parameterList [])
+           (ptc :symbol nil ")")
+           (ptc :subroutineBody
+                [(ptc :symbol nil "{")
+                 (ptc :statements
+                      [(ptc :returnStatement
+                            [(ptc :keyword nil "return")
+                             (ptc :symbol nil ";")])])
+                 (ptc :symbol nil "}")])])
+     (ptc :symbol nil "}")]))
 
 (defn delete-if-exists
   "Deletes path if it exists"
@@ -56,3 +107,16 @@
       (sa/handle-lexed-source xw ls)
       (is (= true (fs/exists? out-path)))
       (is (= test-output (slurp out-path))))))
+
+(deftest write-tree-test
+  (testing "Generates xml representation of parse tree"
+    (let [tw (xml-writer)
+          t exprless-class
+          w (java.io.StringWriter.)
+          expected (slurp
+                     "test/test_files/SampleExpressionLessClass.xml")]
+      (sa/write-tree tw t w)
+      (is (= (.toString w) expected)))))
+
+(deftest handle-parsed-source-test
+  (testing "Writes parse tree to xml file based on source path"))

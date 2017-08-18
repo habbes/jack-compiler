@@ -5,7 +5,8 @@
                      ParsedSourceHandler ParseTreeWriter] :as sa]
             [jack-compiler.syntax-analyzer.token :as tk]
             [jack-compiler.file :as file]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as s]))
 
 ;; string used as unit of indentation
 (def indent-unit " ")
@@ -71,21 +72,22 @@
 (defn tree-seq-to-xml
   "Converts a seq of parse trees to xml"
   [ts level]
-  (map tree-to-xml ts level))
+  (s/join
+    (map #(tree-to-xml % level) ts)))
 
 (defn tree-to-xml
   "Returns a string representing the parse tree
   as an xml tree"
   ([tree]
    (tree-to-xml tree 0))
-  ([{n :name ch :children v :value} level]
-    (str (open-tag n)
-         (if (nil? ch)
-           (str " " (tree-to-xml-value) " ")
-           (str "\n" (indent level)
-                (tree-seq-to-xml ch (inc level))
-                "\n" (indent level)))
-         (close-tag n))))
+  ([{n :name ch :children v :value :as t} level]
+   (str (open-tag n)
+        (if (nil? ch)
+          (str " " (tree-to-xml-value t) " ")
+          (str "\n" (indent level)
+               (tree-seq-to-xml ch (inc level))
+               "\n" (indent level)))
+        (close-tag n))))
 
 (defn write-tree-to-file
   "Writes parse tree to an output xml file corresponding
