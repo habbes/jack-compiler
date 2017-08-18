@@ -4,6 +4,7 @@
             [jack-compiler.syntax-analyzer.lexer :as lx]
             [jack-compiler.syntax-analyzer.core :as sa]
             [jack-compiler.syntax-analyzer.lexed-source :refer [->LexedSource]]
+            [jack-compiler.syntax-analyzer.parsed-source :refer [->ParsedSource]]
             [jack-compiler.syntax-analyzer.parse-tree :refer [parse-tree]]
             [clojure.string :as s]
             [clojure.java.io :as io]
@@ -125,4 +126,15 @@
              (remove-spaces expected))))))
 
 (deftest handle-parsed-source-test
-  (testing "Writes parse tree to xml file based on source path"))
+  (testing "Writes parse tree to xml file based on source path"
+    (let [xw (xml-writer)
+          tr exprless-class
+          src-path "test/test_files/SampleExpressionLessClass.jack"
+          out-path "test/test_files/SampleExpressionLessClass_Gen.xml"
+          sample-path "test/test_files/SampleExpressionLessClass.xml"
+          ps (->ParsedSource src-path tr)]
+      (delete-if-exists out-path)
+      (sa/handle-parsed-source xw ps)
+      (is (= true (fs/exists? out-path)))
+      (is (= (remove-spaces (slurp sample-path))
+             (remove-spaces (slurp out-path)))))))
