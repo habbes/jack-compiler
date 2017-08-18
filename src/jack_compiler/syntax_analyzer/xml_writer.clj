@@ -72,14 +72,14 @@
 (defn tree-seq-to-xml
   "Converts a seq of parse trees to xml"
   [ts level]
-  (s/join
+  (s/join "\n"
     (map #(tree-to-xml % level) ts)))
 
 (defn tree-to-xml
   "Returns a string representing the parse tree
   as an xml tree"
   ([tree]
-   (tree-to-xml tree 0))
+   (tree-to-xml tree 1))
   ([{n :name ch :children v :value :as t} level]
    (str (open-tag n)
         (if (nil? ch)

@@ -37,7 +37,7 @@
   </subroutineDec>
   <subroutineDec>
     <keyword> method </keyword>
-    <identifier> void </identifier>
+    <keyword> void </keyword>
     <identifier> func </identifier>
     <symbol> ( </symbol>
     <parameterList>

@@ -81,6 +81,11 @@
                  (ptc :symbol nil "}")])])
      (ptc :symbol nil "}")]))
 
+(defn remove-spaces
+  "Removes spaces in the specified string"
+  [input]
+  (s/replace input #"\s" ""))
+
 (defn delete-if-exists
   "Deletes path if it exists"
   [path]
@@ -116,7 +121,8 @@
           expected (slurp
                      "test/test_files/SampleExpressionLessClass.xml")]
       (sa/write-tree tw t w)
-      (is (= (.toString w) expected)))))
+      (is (= (remove-spaces (.toString w))
+             (remove-spaces expected))))))
 
 (deftest handle-parsed-source-test
   (testing "Writes parse tree to xml file based on source path"))
