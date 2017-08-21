@@ -18,7 +18,7 @@
   "Parses .jack files in the specified dir
   and outputs their parse trees in correspnding
   xml files"
-  (println "Paring" dir)
+  (println "Parsing" dir)
   (let [h (xml-writer)]
     (sa/parse-and-handle-dir h dir))
   (println "Done."))

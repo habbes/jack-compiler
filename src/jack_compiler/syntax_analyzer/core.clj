@@ -104,6 +104,6 @@
   "Parses all .jack files in the specified dir
   and handles them using the specified handler"
   [h dir]
-  (let [pss (parse-dir)]
+  (let [pss (parse-dir dir)]
     (handle-parsed-sources h pss)))
 
