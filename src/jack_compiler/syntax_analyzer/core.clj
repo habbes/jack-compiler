@@ -93,3 +93,17 @@
     [h ps]
     "Handles a ParsedSource instance"))
 
+(defn handle-parsed-sources
+  "Handles a seq of parsed sources using the
+  specified handler"
+  [h pss]
+  (doseq [ps pss]
+    (handle-parsed-source h ps)))
+
+(defn parse-and-handle-dir
+  "Parses all .jack files in the specified dir
+  and handles them using the specified handler"
+  [h dir]
+  (let [pss (parse-dir)]
+    (handle-parsed-sources h pss)))
+
