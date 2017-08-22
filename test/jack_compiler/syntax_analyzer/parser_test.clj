@@ -54,6 +54,31 @@
         (is (= nodes [])
             (= ts [(tkc :symbol ";")]))))))
 
+(deftest consume-choices-test
+  (testing "Select the right parser fn from a list based on condition clauses
+    and uses that to parse next node"
+    (let [ts [(tkc :symbol ",") (tkc :identifier "x")]
+          [p ts] (consume-choices
+                   ts
+                   #(is-next-type? % :identifier)
+                   consume-identifier
+                   #(is-next-type? % :symbol)
+                   consume-symbol
+                   #(is-next-type? % :keyword)
+                   consume-keyword)]
+      (is (= p (ptc :symbol nil ",")))
+      (is (= ts [(tkc :identifier "x")]))))
+  (testing "Throws error when no predicate matches"
+    (let [ts [(tkc :symbol ",")]]
+      (is (thrown-with-msg? Exception
+                            #"no matching predicate found"
+                            (consume-choices
+                              ts
+                              #(is-next-type? % :identifier)
+                              consume-identifier
+                              #(is-next-type? % :symbol)
+                              consume-symbol))))))
+
 (deftest consume-type-test
   (testing "Consumes int, boolean or char keyword into ParseTree"
     (doseq [k ["int" "char" "boolean"]]

@@ -96,11 +96,11 @@
   a parse tree and remaining tokens from ts
   The function will return (f ts) for the first (pred ts)
   to return true"
-  [ts clauses]
+  [ts & clauses]
   (loop [[pred f & next-clauses] clauses]
-    (if-not pred
+    (if (nil? pred)
       (throw-parser-error
-        "no valid choice found")
+        "no matching predicate found")
       (if (pred ts)
         (f ts)
         (recur next-clauses)))))
