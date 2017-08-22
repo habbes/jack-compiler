@@ -86,6 +86,25 @@
     (f-1 ts)
     (f-2 ts)))
 
+(defn consume-choices
+  "Takes a token seq and a set of clauses.
+  Each clause takes the form:
+  pred f
+  where pred is a function which when applied to ts
+  should return a boolean
+  and f is a parser function which should extract
+  a parse tree and remaining tokens from ts
+  The function will return (f ts) for the first (pred ts)
+  to return true"
+  [ts clauses]
+  (loop [[pred f & next-clauses] clauses]
+    (if-not pred
+      (throw-parser-error
+        "no valid choice found")
+      (if (pred ts)
+        (f ts)
+        (recur next-clauses)))))
+
 (defn consume-terminal
   "Consumes a terminal node of the specified type from ts.
   If values is provided, the node must match both type and be one of values.
