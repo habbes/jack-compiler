@@ -142,6 +142,21 @@
     ts
     ["true" "false" "null" "this"]))
 
+(defn consume-integer-constant
+  "Consumes an integer constant from ts"
+  [ts]
+  (consume-terminal ts :integerConstant))
+
+(defn consume-string-constant
+  "Consumes a string constant"
+  [ts]
+  (consume-terminal ts :stringConstant))
+
+(defn consume-var-name
+  "Consumes a var name"
+  [ts]
+  (consume-identifier ts))
+
 (declare parse-expression)
 (declare parse-expression-list)
 
