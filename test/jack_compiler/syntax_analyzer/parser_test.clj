@@ -76,8 +76,8 @@
                               ts
                               #(is-next-type? % :identifier)
                               consume-identifier
-                              #(is-next-type? % :symbol)
-                              consume-symbol))))))
+                              #(is-next-type? % :keyword)
+                              consume-keyword))))))
 
 (deftest consume-type-test
   (testing "Consumes int, boolean or char keyword into ParseTree"
