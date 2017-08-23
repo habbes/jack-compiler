@@ -304,6 +304,25 @@
         (is (= ts [(tkc :symbol ")")]))))))
 
 (deftest parse-term-test
+  (testing "Parses integerConstant"
+    (let [ts [(tkc :integerConstant "10") (tkc :symbol ",")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :integerConstant nil "10")])))
+      (is (= ts [(tkc :symbol ",")]))))
+  (testing "Parses stringConstant"
+    (let [ts [(tkc :stringConstant "Hello") (tkc :symbol ",")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :stringConstant nil "Hello")])))
+      (is (= ts [(tkc :symbol ",")]))))
+  (testing "Parses keywordConstant"
+    (doseq [kw ["true" "false" "null" "this"]]
+      (let [ts [(tkc :keyword kw) (tkc :symbol ",")]
+            [p ts] (parse-term ts)]
+        (is (= p (ptc :term
+                      [(ptc :keyword nil kw)])))
+        (is (= ts [(tkc :symbol ",")])))))
   (testing "Parses varName"
     (let [ts [(tkc :identifier "x") (tkc :symbol ",")]
           [p ts] (parse-term ts)]
