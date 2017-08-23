@@ -404,10 +404,10 @@
       (is (thrown-with-msg? Exception
                             #"symbol expected but found identifier y"
                             (parse-expression-list ts)))))
-  (testing "Throws error when next token is not identifier"
+  (testing "Throws error when next token is not an expression"
     (let [ts [(tkc :keyword "let") (tkc :identifier "x")]]
       (is (thrown-with-msg? Exception
-                            #"identifier expected but found keyword let"
+                            #"true or false or null or this expected but found let"
                             (parse-expression-list ts)))))
   (testing "Throws error when stream ends before closing bracket"
     (let [ts [(tkc :identifier "x")]]

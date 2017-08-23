@@ -207,11 +207,20 @@
 
 (defn parse-term
   "Parses a term node"
-  ;; TODO: simplified version that only parses var names
+  ;; TODO: handle all cases
   [ts]
-  (let [[iden ts] (consume-identifier ts)]
-    [(pt/parse-tree :term [iden])
-     ts]))
+  (let [[ch ts]
+        (consume-choices
+          ts
+          #(is-next-type? % :integerConstant)
+          consume-integer-constant
+          #(is-next-type? % :stringConstant)
+          consume-string-constant
+          #(is-next-type? % :keyword)
+          consume-keyword-constant
+          #(is-next-type? % :identifier)
+          consume-identifier)]
+    [(pt/parse-tree :term (nodes-vec ch)) ts]))
 
 (defn consume-op-term
   "Consumes an `op term` combination"
