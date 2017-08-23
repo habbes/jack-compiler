@@ -24,6 +24,12 @@
     (throw-parser-error "unexpected end of stream")
     [t ts]))
 
+(defn after-next
+  "Applies f to the tokens after the direct next one
+  and returns the result"
+  [[_ & next-ts] f]
+  (f next-ts))
+
 (defn is-next-value?
   "Checks whether the next token in ts matches values.
   If values is a list, then it must match one of the values."
@@ -48,11 +54,19 @@
   [ts]
   (is-next-value? ts "."))
 
-(defn after-next
-  "Applies f to the tokens after the direct next one
-  and returns the result"
-  [[_ & next-ts] f]
-  (f next-ts))
+(defn is-next-open-paren?
+  "Checks whether the next token is an opening
+  parenthesis '('"
+  [ts]
+  (is-next-value? ts "("))
+
+(defn is-next-subroutine-call?
+  "Checks whether the next tokens make up
+  a subroutine call"
+  [ts]
+  (and (is-next-type? ts :identifier)
+       (or (after-next ts is-next-period?)
+           (after-next ts is-next-open-paren?))))
 
 (defn consume-until
   "Consumes 0 or more instances of a program structure
@@ -218,6 +232,8 @@
           consume-string-constant
           #(is-next-type? % :keyword)
           consume-keyword-constant
+          is-next-subroutine-call?
+          consume-subroutine-call
           #(is-next-type? % :identifier)
           consume-identifier)]
     [(pt/parse-tree :term (nodes-vec ch)) ts]))

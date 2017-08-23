@@ -323,6 +323,28 @@
         (is (= p (ptc :term
                       [(ptc :keyword nil kw)])))
         (is (= ts [(tkc :symbol ",")])))))
+  (testing "Parses subroutineCall"
+    (let [ts [(tkc :identifier "func") (tkc :symbol "(")
+              (tkc :symbol ")") (tkc :symbol ";")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :identifier nil "func")
+                     (ptc :symbol nil "(")
+                     (ptc :expressionList [])
+                     (ptc :symbol nil ")")])))
+      (is (= ts [(tkc :symbol ";")])))
+    (let [ts [(tkc :identifier "obj") (tkc :symbol ".")
+              (tkc :identifier "func") (tkc :symbol "(")
+              (tkc :symbol ")") (tkc :symbol ";")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :identifier nil "obj")
+                     (ptc :symbol nil ".")
+                     (ptc :identifier nil "func")
+                     (ptc :symbol nil "(")
+                     (ptc :expressionList [])
+                     (ptc :symbol nil ")")])))
+      (is (= ts [(tkc :symbol ";")]))))
   (testing "Parses varName"
     (let [ts [(tkc :identifier "x") (tkc :symbol ",")]
           [p ts] (parse-term ts)]
