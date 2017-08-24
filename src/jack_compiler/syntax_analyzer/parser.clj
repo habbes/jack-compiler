@@ -49,6 +49,11 @@
     ts
     ["+" "-" "*" "/" "&" "|" "<" ">" "="]))
 
+(defn is-next-unary-op?
+  "Checks whether the next token is a unary operator"
+  [ts]
+  (is-next-value? ts ["-" "~"]))
+
 (defn is-next-period?
   "Checks whether the next token is a period '.'"
   [ts]
@@ -185,6 +190,7 @@
   [ts]
   (consume-terminal ts :stringConstant))
 
+(declare parse-term)
 (declare parse-expression)
 (declare parse-expression-list)
 
@@ -239,6 +245,21 @@
     consume-method-call
     consume-function-call))
 
+(defn consume-paren-expression
+  "Consumes an expression wrapped in parenthesis"
+  [ts]
+  (let [[op-br ts] (consume-symbol ts ["("])
+        [ex ts] (parse-expression ts)
+        [cl-br ts] (consume-symbol ts [")"])]
+    [(nodes-vec op-br ex cl-br) ts]))
+
+(defn consume-unary-op-term
+  "Consumes a unaryOp term sequence"
+  [ts]
+  (let [[op ts] (consume-unary-op ts)
+        [term ts] (parse-term ts)]
+    [(nodes-vec op term) ts]))
+
 (defn parse-term
   "Parses a term node"
   ;; TODO: handle all cases
@@ -255,7 +276,11 @@
           is-next-subroutine-call?
           consume-subroutine-call
           #(is-next-type? % :identifier)
-          consume-var-term)]
+          consume-var-term
+          #(is-next-value? % "(")
+          consume-paren-expression
+          is-next-unary-op?
+          )]
     [(pt/parse-tree :term (nodes-vec ch)) ts]))
 
 (defn consume-op-term
