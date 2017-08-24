@@ -350,7 +350,32 @@
           [p ts] (parse-term ts)]
       (is (= p (ptc :term
                     [(ptc :identifier nil "x")])))
-      (is (= ts [(tkc :symbol ",")])))))
+      (is (= ts [(tkc :symbol ",")]))))
+  (testing "parses varName[expression]"
+    (let [ts [(tkc :identifier "objects") (tkc :symbol "[")
+              (tkc :integerConstant "1") (tkc :symbol "]")
+              (tkc :symbol ";")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :identifier nil "objects")
+                     (ptc :symbol nil "[")
+                     (ptc :expression
+                          [(ptc :term
+                                [(ptc :integerConstant nil "1")])])
+                     (ptc :symbol nil "]")])))
+      (is (= ts [(tkc :symbol ";")])))
+    (let [ts [(tkc :identifier "objects") (tkc :symbol "[")
+              (tkc :identifier "x") (tkc :symbol "]")
+              (tkc :symbol ";")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :identifier nil "objects")
+                     (ptc :symbol nil "[")
+                     (ptc :expression
+                          [(ptc :term
+                                [(ptc :identifier nil "x")])])
+                     (ptc :symbol nil "]")])))
+      (is (= ts [(tkc :symbol ";")])))))
 
 (deftest parse-expression-test
   (testing "Parses 'term'"

@@ -185,13 +185,33 @@
   [ts]
   (consume-terminal ts :stringConstant))
 
-(defn consume-var-name
-  "Consumes a var name"
-  [ts]
-  (consume-identifier ts))
-
 (declare parse-expression)
 (declare parse-expression-list)
+
+(defn consume-array-index
+  "Consumes an `'['expression']'` combination"
+  [ts]
+  (let [[open-br ts] (consume-symbol ts ["["])
+        [ex ts] (parse-expression ts)
+        [close-br ts] (consume-symbol ts ["]"])]
+    [(nodes-vec open-br ex close-br) ts]))
+
+(defn consume-when-array-index
+  "Consume an array index `[expr]`
+  if the next token is '['"
+  [ts]
+  (consume-when
+    ts
+    #(is-next-value? % "[")
+    consume-array-index))
+
+(defn consume-var-term
+  "Consumes a 'varName` or `varName[expression]'
+  term"
+  [ts]
+  (let [[v ts] (consume-identifier ts)
+        [index ts] (consume-when-array-index ts)]
+    [(nodes-vec v index) ts]))
 
 (defn consume-function-call
   "Consumes `subroutineName'('expressionList')'"
@@ -235,7 +255,7 @@
           is-next-subroutine-call?
           consume-subroutine-call
           #(is-next-type? % :identifier)
-          consume-identifier)]
+          consume-var-term)]
     [(pt/parse-tree :term (nodes-vec ch)) ts]))
 
 (defn consume-op-term
@@ -302,23 +322,6 @@
   [ts]
   (let [[exprs ts] (consume-when-expression-seq ts)]
     [(pt/parse-tree :expressionList exprs) ts]))
-
-(defn consume-array-index
-  "Consumes an `'['expression']'` combination"
-  [ts]
-  (let [[open-br ts] (consume-symbol ts ["["])
-        [ex ts] (parse-expression ts)
-        [close-br ts] (consume-symbol ts ["]"])]
-    [(nodes-vec open-br ex close-br) ts]))
-
-(defn consume-when-array-index
-  "Consume an array index `[expr]`
-  if the next token is '['"
-  [ts]
-  (consume-when
-    ts
-    #(is-next-value? % "[")
-    consume-array-index))
 
 (defn parse-let-statement
   "Consumes `'let' varName ('['expression'])?'='expression';'`"
