@@ -8,8 +8,8 @@
             [clojure.java.io :as io]
             [clojure.string :as s]))
 
-;; string used as unit of indentation
-(def indent-unit " ")
+;; string used as unit for indentation
+(def indent-unit "  ")
 
 (defn indent
   "Returns an identation of the
@@ -79,13 +79,15 @@
   "Returns a string representing the parse tree
   as an xml tree"
   ([tree]
-   (tree-to-xml tree 1))
+   (tree-to-xml tree 0))
   ([{n :name ch :children v :value :as t} level]
-   (str (open-tag n)
+   (str (indent level) (open-tag n)
         (if (nil? ch)
           (str " " (tree-to-xml-value t) " ")
-          (str "\n" (indent level)
-               (tree-seq-to-xml ch (inc level))
+          (str (if (empty? ch)
+                 ""
+                 (str "\n"
+                      (tree-seq-to-xml ch (inc level))))
                "\n" (indent level)))
         (close-tag n))))
 

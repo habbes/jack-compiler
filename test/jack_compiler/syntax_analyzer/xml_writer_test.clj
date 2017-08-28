@@ -122,8 +122,8 @@
           expected (slurp
                      "test/test_files/SampleExpressionLessClass.xml")]
       (sa/write-tree tw t w)
-      (is (= (remove-spaces (.toString w))
-             (remove-spaces expected))))))
+      (is (= (.toString w)
+             expected)))))
 
 (deftest handle-parsed-source-test
   (testing "Writes parse tree to xml file based on source path"
@@ -136,5 +136,5 @@
       (delete-if-exists out-path)
       (sa/handle-parsed-source xw ps)
       (is (= true (fs/exists? out-path)))
-      (is (= (remove-spaces (slurp sample-path))
-             (remove-spaces (slurp out-path)))))))
+      (is (= (slurp sample-path)
+             (slurp out-path))))))
