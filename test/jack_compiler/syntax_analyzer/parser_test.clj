@@ -375,7 +375,33 @@
                           [(ptc :term
                                 [(ptc :identifier nil "x")])])
                      (ptc :symbol nil "]")])))
-      (is (= ts [(tkc :symbol ";")])))))
+      (is (= ts [(tkc :symbol ";")]))))
+  (testing "Parses `unaryOp term`"
+    (let [ops ["-" "~"]]
+      (doseq [op ops]
+        (let [ts [(tkc :symbol op) (tkc :identifier "x")
+                  (tkc :symbol ";")]
+              [p ts] (parse-term ts)]
+          (is (= p (ptc :term
+                        [(ptc :symbol nil op)
+                         (ptc :term
+                              [(ptc :identifier nil "x")])])))
+          (is (= ts [(tkc :symbol ";")]))))))
+  (testing "Parses `'('expression')'`"
+    (let [ts [(tkc :symbol "(") (tkc :identifier "x")
+              (tkc :symbol "+") (tkc :integerConstant "2")
+              (tkc :symbol ")") (tkc :symbol ",")]
+          [p ts] (parse-term ts)]
+      (is (= p (ptc :term
+                    [(ptc :symbol nil "(")
+                     (ptc :expression
+                          [(ptc :term
+                                [(ptc :identifier nil "x")])
+                           (ptc :symbol nil "+")
+                           (ptc :term
+                                [(ptc :integerConstant nil "2")])])
+                     (ptc :symbol nil ")")])))
+      (is (= ts [(tkc :symbol ",")])))))
 
 (deftest parse-expression-test
   (testing "Parses 'term'"

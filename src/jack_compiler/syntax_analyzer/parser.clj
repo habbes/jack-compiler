@@ -280,7 +280,7 @@
           #(is-next-value? % "(")
           consume-paren-expression
           is-next-unary-op?
-          )]
+          consume-unary-op-term)]
     [(pt/parse-tree :term (nodes-vec ch)) ts]))
 
 (defn consume-op-term
