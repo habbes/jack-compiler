@@ -56,7 +56,7 @@
   "Writes tokens to an output xml file corresponding
   to the in-path."
   [tw in-path tokens]
-  (let [out-path (file/get-output-path-for-file in-path "T_Gen.xml")]
+  (let [out-path (file/get-output-path-for-file in-path "T.xml")]
     (with-open [w (io/writer out-path)]
       (sa/write-tokens tw tokens w))))
 
@@ -95,7 +95,7 @@
   "Writes parse tree to an output xml file corresponding
   to the in-path."
   [tw in-path tree]
-  (let [out-path (file/get-output-path-for-file in-path "_Gen.xml")]
+  (let [out-path (file/get-output-path-for-file in-path ".xml")]
     (with-open [w (io/writer out-path)]
       (sa/write-tree tw tree w))))
 

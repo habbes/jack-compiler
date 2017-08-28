@@ -107,7 +107,7 @@
     (let [xw (xml-writer)
           ts (lx/token-seq test-src)
           src-path "test/test_files/SampleIfBlock.jack"
-          out-path "test/test_files/SampleIfBlockT_Gen.xml"
+          out-path "test/test_files/SampleIfBlockT.xml"
           ls (->LexedSource src-path ts)]
       (delete-if-exists out-path)
       (sa/handle-lexed-source xw ls)
@@ -120,7 +120,7 @@
           t exprless-class
           w (java.io.StringWriter.)
           expected (slurp
-                     "test/test_files/SampleExpressionLessClass.xml")]
+                     "test/test_files/SampleExpressionLessClass_Expected.xml")]
       (sa/write-tree tw t w)
       (is (= (.toString w)
              expected)))))
@@ -130,8 +130,8 @@
     (let [xw (xml-writer)
           tr exprless-class
           src-path "test/test_files/SampleExpressionLessClass.jack"
-          out-path "test/test_files/SampleExpressionLessClass_Gen.xml"
-          sample-path "test/test_files/SampleExpressionLessClass.xml"
+          out-path "test/test_files/SampleExpressionLessClass.xml"
+          sample-path "test/test_files/SampleExpressionLessClass_Expected.xml"
           ps (->ParsedSource src-path tr)]
       (delete-if-exists out-path)
       (sa/handle-parsed-source xw ps)
