@@ -27,7 +27,7 @@
   (let [index (var-count tbl kind)]
     (->
       tbl
-      assoc-in [:entries name] {:name name :kind kind :type type :index index}
+      assoc-in [:entries name] (TableEntry. name type kind index)
       inc-count kind)))
 
 (defn var-attr
