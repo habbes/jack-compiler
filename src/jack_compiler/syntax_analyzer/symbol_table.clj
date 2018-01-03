@@ -34,7 +34,7 @@
   "Gets the value of the specified attribute
   of the specified variable in the symbol table"
   [tbl name attr]
-  (-> tbl :entries name attr))
+  (-> tbl :entries (get name) attr))
 
 (defn kind-of
   "Gets the kind of the specified variable"

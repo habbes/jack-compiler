@@ -6,7 +6,7 @@
 (defn init-table
   "Creates empty scope tables"
   []
-  (ScopedSymbolTable. 
+  (ScopedSymbolTable.
     (symt/symbol-table) (symt/symbol-table)))
 
 (defn start-subroutine
@@ -54,7 +54,7 @@
   [tbl name attr]
   (if-let [val (-> tbl :subroutine (symt/var-attr name attr))]
     val
-    (symt/kind-of (.class tbl) name)))
+    (-> tbl .class (symt/var-attr name attr))))
 
 (defn kind-of
   "Gets the kind of the specified
