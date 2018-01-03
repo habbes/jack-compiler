@@ -1,5 +1,5 @@
-(ns jack-compiler.syntax-analyzer.scope-symbol-table
-  :require [jack-compiler.syntax-analyzer.symbol-table :as symt])
+(ns jack-compiler.syntax-analyzer.scoped-symbol-table
+  (:require [jack-compiler.syntax-analyzer.symbol-table :as symt]))
 
 (defrecord ScopedSymbolTable [class subroutine])
 
@@ -7,7 +7,7 @@
   "Creates empty scope tables"
   []
   (ScopedSymbolTable. 
-    [(symt/symbol-table) (symt/symbol-table)]))
+    (symt/symbol-table) (symt/symbol-table)))
 
 (defn start-subroutine
   "Resets the subroutine scope symbol table"
@@ -47,7 +47,7 @@
   [tbl kind]
   (var-count tbl kind :subroutine))
 
-(def attr-of
+(defn attr-of
   "Gets the value of the specified
   attribute of the specfied variable
   in the current scope"
@@ -72,5 +72,5 @@
 (defn index-of
   "Gets the index of the specified variable
   in the current scope"
-  [tbl-name]
+  [tbl name]
   (attr-of tbl name :index))

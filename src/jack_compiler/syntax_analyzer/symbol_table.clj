@@ -13,7 +13,7 @@
   "Gets the number of variables of the given kind
   in the symbol table"
   [tbl kind]
-  (kind (:counts tbl))
+  (kind (:counts tbl)))
 
 (defn inc-count
   "Increment the counter for the specified variable
@@ -27,8 +27,8 @@
   (let [index (var-count tbl kind)]
     (->
       tbl
-      assoc-in [:entries name] (TableEntry. name type kind index)
-      inc-count kind)))
+      (assoc-in [:entries name] (TableEntry. name type kind index))
+      (inc-count kind))))
 
 (defn var-attr
   "Gets the value of the specified attribute
