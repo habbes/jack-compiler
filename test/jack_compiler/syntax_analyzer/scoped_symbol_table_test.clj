@@ -15,10 +15,12 @@
           tbl (add-class-entry tbl {:name "x" :type "int" :kind :field })]
       (is (= (-> tbl .class .entries)
              {"x" (symt/->TableEntry "x" "int" :field 0)}))
-      (is (= (-> tbl .class .counts :field) 1))))
+      (testing "and increments segment counter"
+        (is (= (-> tbl .class .counts :field) 1)))))
   (testing "Adds entry to subroutine scope"
     (let [tbl (init-table)
           tbl (add-subroutine-entry tbl {:name "y" :type "String" :kind :local})]
       (is (= (-> tbl .subroutine .entries)
              {"y" (symt/->TableEntry "y" "String" :local 0)}))
-      (is (= (-> tbl .subroutine .counts :local) 1)))))
+      (testing "and increments segment counter"
+        (is (= (-> tbl .subroutine .counts :local) 1))))))
