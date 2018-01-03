@@ -24,7 +24,7 @@
   [tbl entry]
   (add-entry tbl entry :class))
 
-(defn add-sub-entry
+(defn add-subroutine-entry
   "Adds subroutine-scope variable entry"
   [tbl entry]
   (add-entry tbl entry :subroutine))
